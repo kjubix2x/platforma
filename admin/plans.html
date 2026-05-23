@@ -10,7 +10,7 @@
   <title>Plany Treningowe — Crystal Ballers</title>
   <link rel="stylesheet" href="../css/main.css">
   <style>
-    .plans-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:18px; margin-bottom:36px; }
+    .plans-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(min(320px,100%),1fr)); gap:18px; margin-bottom:36px; }
     .admin-plan-card { background:var(--card); border:1px solid var(--border); border-radius:var(--r-xl); overflow:hidden; transition:all 0.2s; animation:fadeUp 0.4s var(--ease-out) both; display:flex; flex-direction:column; }
     .admin-plan-card:hover { border-color:var(--border2); transform:translateY(-3px); box-shadow:var(--shadow); }
     .admin-plan-cover { height:140px; display:flex; align-items:center; justify-content:center; position:relative; border-bottom:1px solid var(--border); color:var(--plan-color, var(--gold)); }

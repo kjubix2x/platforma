@@ -1,5 +1,5 @@
 // Crystal Ballers — Service Worker
-const CACHE = 'cb-shell-v12';
+const CACHE = 'cb-shell-v13-mobile-fix';
 const PRECACHE = [
   './',
   './index.html',

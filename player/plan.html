@@ -96,7 +96,7 @@
     .phase-progress-info .lbl { font-size:0.7rem; color:var(--txt3); text-transform:uppercase; letter-spacing:0.08em; }
 
     /* Workout cards */
-    .workouts-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:16px; }
+    .workouts-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(min(280px, 100%), 1fr)); gap:16px; }
     .workout-card {
       background:var(--card); border:1px solid var(--border);
       border-radius:var(--r-xl); padding:22px 24px;

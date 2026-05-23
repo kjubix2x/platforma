@@ -12,8 +12,13 @@
   <title>Cennik — Crystal Ballers</title>
   <link rel="stylesheet" href="css/main.css">
   <style>
-    body { background: var(--bg); min-height: 100vh; }
-    .pricing-page { min-height:100vh; padding: 32px 24px 80px; max-width: 1240px; margin: 0 auto; position: relative; }
+    body { background: var(--bg); min-height: 100vh; overflow-x: hidden; }
+    .pricing-page { min-height:100vh; padding: 32px 24px 80px; max-width: 1240px; margin: 0 auto; position: relative; overflow-x: hidden; }
+    @media (max-width: 480px) {
+      .pricing-page { padding: 16px 14px 60px; }
+    }
+    /* Stripe Elements iframe nie wystaje */
+    #payment-element, #payment-element iframe { max-width: 100% !important; }
     .pricing-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 56px; flex-wrap: wrap; gap: 16px; }
     .pricing-logo { display: flex; align-items: center; gap: 12px; text-decoration: none; }
     .pricing-logo-icon { width: 42px; height: 42px; background: var(--gold); border-radius: var(--r-md); display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 0.95rem; color: #000; }

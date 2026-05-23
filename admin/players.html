@@ -15,7 +15,7 @@
     .filter-pills { display:flex; gap:6px; flex-wrap:wrap; }
     .filter-pill { padding:8px 14px; border-radius:var(--r-full); background:var(--card); border:1px solid var(--border); font-size:0.8rem; cursor:pointer; color:var(--txt2); transition:all 0.15s; }
     .filter-pill.active { background:var(--gold); color:#000; border-color:var(--gold); font-weight:600; }
-    .players-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:14px; }
+    .players-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(min(320px,100%),1fr)); gap:14px; }
     .pcard { background:var(--card); border:1px solid var(--border); border-radius:var(--r-lg); padding:20px; transition:all 0.2s; animation:fadeUp 0.4s var(--ease-out) both; }
     .pcard:hover { border-color:var(--border2); transform:translateY(-2px); box-shadow:var(--shadow); }
     .pcard-top { display:flex; align-items:flex-start; gap:14px; margin-bottom:16px; }
