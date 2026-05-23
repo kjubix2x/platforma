@@ -1,0 +1,1278 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#07070a">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/svg+xml" href="icon.svg">
+  <link rel="apple-touch-icon" href="icon-192.svg">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Cennik — Crystal Ballers</title>
+  <link rel="stylesheet" href="css/main.css">
+  <style>
+    body { background: var(--bg); min-height: 100vh; }
+    .pricing-page { min-height:100vh; padding: 32px 24px 80px; max-width: 1240px; margin: 0 auto; position: relative; }
+    .pricing-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 56px; flex-wrap: wrap; gap: 16px; }
+    .pricing-logo { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+    .pricing-logo-icon { width: 42px; height: 42px; background: var(--gold); border-radius: var(--r-md); display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 0.95rem; color: #000; }
+    .pricing-logo-name { font-size: 1.1rem; font-weight: 800; letter-spacing: -0.02em; }
+    .pricing-logo-sub { font-size: 0.7rem; color: var(--txt3); letter-spacing: 0.14em; text-transform: uppercase; }
+
+    .pricing-hero { text-align: center; max-width: 720px; margin: 0 auto 56px; }
+    .pricing-eyebrow { color: var(--gold); letter-spacing: 0.14em; text-transform: uppercase; font-size: 0.78rem; font-weight: 700; margin-bottom: 18px; animation: fadeUp 0.5s var(--ease-out) both; }
+    .pricing-title { font-size: clamp(2rem, 5vw, 3.2rem); font-weight: 900; letter-spacing: -0.04em; line-height: 1.05; margin-bottom: 22px; animation: fadeUp 0.5s var(--ease-out) 0.05s both; }
+    .pricing-title .gold { color: var(--gold); }
+    .pricing-sub { font-size: 1.05rem; color: var(--txt2); line-height: 1.6; margin-bottom: 32px; animation: fadeUp 0.5s var(--ease-out) 0.1s both; }
+
+    /* Plan toggle */
+    .billing-toggle { display: inline-flex; gap: 4px; background: var(--card); border: 1px solid var(--border2); border-radius: var(--r-full); padding: 5px; margin-bottom: 56px; animation: fadeUp 0.5s var(--ease-out) 0.15s both; }
+    .billing-toggle button { padding: 10px 22px; border: none; background: transparent; color: var(--txt2); font-family: inherit; font-size: 0.875rem; font-weight: 600; border-radius: var(--r-full); cursor: pointer; transition: all 0.2s; }
+    .billing-toggle button.active { background: var(--gold); color: #000; }
+    .billing-toggle .save { font-size: 0.7rem; background: var(--green); color: #000; padding: 2px 7px; border-radius: var(--r-full); margin-left: 6px; font-weight: 800; }
+
+    /* Plans showcase (locked cards) */
+    .plans-showcase { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-bottom: 56px; }
+    @media (max-width: 880px) { .plans-showcase { grid-template-columns: 1fr; } }
+    .show-card {
+      background: var(--card); border: 1px solid var(--border2);
+      border-radius: var(--r-xl); padding: 28px 24px;
+      position: relative; overflow: hidden;
+      animation: fadeUp 0.5s var(--ease-out) both;
+    }
+    .show-card.locked::before {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(180deg, transparent 30%, rgba(7,7,10,0.4) 100%);
+      pointer-events: none;
+    }
+    .show-card-icon-wrap {
+      width: 64px; height: 64px;
+      border-radius: var(--r-md);
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border2);
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 18px;
+      color: var(--plan-color, var(--gold));
+    }
+    .show-card-icon-wrap svg { width: 32px; height: 32px; }
+    .show-card-eyebrow { font-size: 0.7rem; color: var(--plan-color, var(--gold)); letter-spacing: 0.14em; text-transform: uppercase; font-weight: 700; margin-bottom: 8px; }
+    .show-card-name { font-size: 1.2rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 10px; }
+    .show-card-desc {
+      font-size: 0.85rem; color: var(--txt2); line-height: 1.55; margin-bottom: 16px;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    /* hide line breaks in clamped preview — pierwsze linie wyglądają czysto */
+    .show-card-desc br { display: none; }
+    .show-card-meta { font-size: 0.78rem; color: var(--txt3); padding-top: 14px; border-top: 1px solid var(--border); }
+    .read-more-btn {
+      margin-top: 14px;
+      width: 100%;
+      padding: 11px 14px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border2);
+      border-radius: var(--r-md);
+      color: var(--txt);
+      font-size: 0.82rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      transition: all 0.2s;
+    }
+    .read-more-btn:hover {
+      background: var(--plan-color, var(--gold));
+      border-color: var(--plan-color, var(--gold));
+      color: #000;
+    }
+    .read-more-btn svg { width: 14px; height: 14px; transition: transform 0.2s; }
+    .read-more-btn:hover svg { transform: translateX(3px); }
+
+    /* Plan detail modal */
+    .plan-detail-hero {
+      background: linear-gradient(135deg, var(--plan-color, var(--gold))22 0%, transparent 70%);
+      padding: 24px 24px 22px;
+      border-radius: var(--r-lg);
+      margin-bottom: 22px;
+      display: flex; align-items: center; gap: 16px;
+    }
+    .plan-detail-icon {
+      width: 56px; height: 56px;
+      border-radius: var(--r-md);
+      background: var(--plan-color, var(--gold));
+      color: #000;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .plan-detail-icon svg { width: 30px; height: 30px; }
+    .plan-detail-eyebrow { font-size: 0.7rem; color: var(--plan-color, var(--gold)); letter-spacing: 0.14em; text-transform: uppercase; font-weight: 700; margin-bottom: 4px; }
+    .plan-detail-name { font-size: 1.4rem; font-weight: 900; letter-spacing: -0.02em; }
+    .plan-detail-desc { font-size: 0.92rem; color: var(--txt); line-height: 1.7; margin-bottom: 22px; }
+    .plan-detail-stats {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+      margin-bottom: 22px;
+    }
+    .plan-detail-stat {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      padding: 12px 14px;
+      text-align: center;
+    }
+    .plan-detail-stat .num { font-size: 1.4rem; font-weight: 800; color: var(--plan-color, var(--gold)); letter-spacing: -0.03em; line-height: 1; }
+    .plan-detail-stat .lbl { font-size: 0.68rem; color: var(--txt3); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 5px; }
+    .plan-detail-phases-title {
+      font-size: 0.72rem; color: var(--txt3); letter-spacing: 0.14em; text-transform: uppercase; font-weight: 700;
+      margin-bottom: 10px;
+    }
+    .plan-detail-phase {
+      display: flex; gap: 12px; align-items: flex-start;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.85rem;
+    }
+    .plan-detail-phase:last-of-type { border-bottom: none; }
+    .plan-detail-phase-num {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      background: var(--card2);
+      border: 1px solid var(--border2);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.78rem; font-weight: 700;
+      color: var(--plan-color, var(--gold));
+      flex-shrink: 0;
+    }
+    .plan-detail-phase-body { flex: 1; padding-top: 3px; }
+    .plan-detail-phase-name { font-weight: 700; }
+    .plan-detail-phase-focus { font-size: 0.78rem; color: var(--txt2); margin-top: 2px; }
+
+    /* Benefits section in modal */
+    .plan-benefits {
+      margin-top: 28px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+    }
+    .plan-benefits-title {
+      font-size: 1.05rem;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+      margin-bottom: 18px;
+      color: #fff;
+    }
+    .plan-benefits-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 12px; }
+    .plan-benefit-item {
+      display: flex; gap: 12px; align-items: flex-start;
+      padding: 12px 14px;
+      background: rgba(250,204,21,0.06);
+      border: 1px solid rgba(250,204,21,0.2);
+      border-radius: var(--r-md);
+      transition: all 0.2s;
+    }
+    .plan-benefit-item:hover { background: rgba(250,204,21,0.1); border-color: rgba(250,204,21,0.35); }
+    .plan-benefit-check {
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      background: #FACC15;
+      color: #000;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .plan-benefit-check svg { width: 13px; height: 13px; stroke: currentColor; stroke-width: 3; fill: none; }
+    .plan-benefit-text { font-size: 0.88rem; line-height: 1.55; color: var(--txt); }
+
+    /* Modal CTA "Dołączam" */
+    .modal-cta-dolaczam {
+      width: 100%;
+      background: #FACC15;
+      color: #000;
+      border: none;
+      padding: 16px 24px;
+      border-radius: var(--r-md);
+      font-family: inherit;
+      font-size: 1rem;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+      transition: all 0.2s;
+      margin-top: 24px;
+    }
+    .modal-cta-dolaczam:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(250,204,21,0.4); }
+    .modal-cta-dolaczam svg { width: 18px; height: 18px; }
+    .lock-badge {
+      position: absolute; top: 18px; right: 18px;
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      background: rgba(0,0,0,0.5);
+      border: 1px solid var(--border3);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--txt2);
+      backdrop-filter: blur(8px);
+    }
+    .lock-badge svg { width: 15px; height: 15px; }
+
+    /* Subscribe card */
+    .subscribe-card {
+      background: linear-gradient(135deg, rgba(200,164,90,0.14) 0%, var(--card) 60%);
+      border: 1.5px solid var(--gold);
+      border-radius: var(--r-2xl);
+      padding: 40px 40px;
+      max-width: 700px;
+      margin: 0 auto;
+      position: relative;
+      animation: fadeUp 0.5s var(--ease-out) 0.2s both;
+    }
+    .subscribe-card-header { text-align: center; margin-bottom: 32px; }
+    .price-display { display: inline-flex; align-items: baseline; gap: 8px; margin-bottom: 8px; }
+    .price-amount { font-size: 4rem; font-weight: 900; letter-spacing: -0.06em; line-height: 1; color: var(--gold); }
+    .price-period { font-size: 1.05rem; color: var(--txt2); font-weight: 500; }
+    .price-note { font-size: 0.875rem; color: var(--txt2); }
+    .price-savings { display: inline-block; background: var(--green); color: #000; font-size: 0.72rem; font-weight: 800; padding: 4px 10px; border-radius: var(--r-full); margin-left: 8px; }
+
+    .feature-list { list-style: none; padding: 0; margin: 0 0 32px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media (max-width: 640px) { .feature-list { grid-template-columns: 1fr; } }
+    .feature-item { display: flex; align-items: flex-start; gap: 10px; font-size: 0.88rem; color: var(--txt); }
+    .feature-item .check-icon { width: 20px; height: 20px; border-radius: 50%; background: rgba(34,197,94,0.15); border: 1px solid rgba(34,197,94,0.3); display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+    .feature-item .check-icon svg { width: 12px; height: 12px; stroke: var(--green); }
+
+    .footer-note { text-align: center; margin-top: 40px; color: var(--txt3); font-size: 0.78rem; line-height: 1.6; }
+    .footer-note a { color: var(--gold); }
+
+    .install-banner { position: fixed; bottom: 20px; right: 20px; z-index: 50; }
+
+    /* ── 4-Pillar grid ──────────────────────────────────── */
+    .pillars-section { margin: 80px auto 0; max-width: 1080px; }
+    .pillars-grid {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 48px;
+      align-items: center;
+    }
+    .pillars-col { display: flex; flex-direction: column; gap: 36px; }
+    .pillar { animation: fadeUp 0.5s var(--ease-out) both; }
+    .pillar-head { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+    .pillar-head svg { width: 22px; height: 22px; stroke: #FACC15; flex-shrink: 0; }
+    .pillar-title { font-size: 1.25rem; font-weight: 900; letter-spacing: 0.04em; color: #FACC15; }
+    .pillar-text { font-size: 0.92rem; color: var(--txt); line-height: 1.65; max-width: 360px; }
+    .pillars-center { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+    .pillars-logo svg { width: 110px; height: 110px; }
+    .pillars-logo-text { margin-top: 14px; text-align: center; }
+    .pillars-logo-name { font-size: 1.45rem; font-weight: 700; letter-spacing: -0.02em; color: #fff; }
+    .pillars-logo-sub { font-size: 0.72rem; letter-spacing: 0.3em; color: var(--txt2); margin-top: 4px; }
+    @media (max-width: 880px) {
+      .pillars-grid { grid-template-columns: 1fr; gap: 32px; }
+      .pillars-center { order: -1; }
+    }
+
+    /* ── O MNIE ─────────────────────────────────────────── */
+    .about-section { margin: 100px auto 0; max-width: 1180px; }
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      align-items: center;
+    }
+    .about-content { animation: fadeUp 0.5s var(--ease-out) both; }
+    .about-title { font-size: clamp(2.4rem, 6vw, 3.6rem); font-weight: 900; letter-spacing: -0.04em; margin-bottom: 26px; line-height: 1; }
+    .about-text { font-size: 0.95rem; color: var(--txt); line-height: 1.75; margin-bottom: 18px; }
+    .about-text strong { color: #fff; font-weight: 700; }
+    .about-photo {
+      position: relative;
+      border-radius: var(--r-2xl);
+      overflow: hidden;
+      aspect-ratio: 4/5;
+      background: linear-gradient(135deg, #1a1a1f 0%, #0c0c10 100%);
+      border: 1px solid var(--border2);
+      animation: fadeUp 0.5s var(--ease-out) 0.1s both;
+    }
+    .about-photo img { width: 100%; height: 100%; object-fit: cover; }
+    .about-photo-placeholder {
+      width: 100%; height: 100%;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      color: var(--txt3); gap: 12px;
+    }
+    .about-photo-placeholder svg { width: 80px; height: 80px; opacity: 0.3; }
+    .about-photo-placeholder span { font-size: 0.85rem; }
+    .about-badge {
+      position: absolute;
+      left: 20px; bottom: 20px;
+      background: #FACC15;
+      color: #000;
+      padding: 12px 22px;
+      border-radius: var(--r-full);
+      font-size: 0.82rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      display: inline-flex; align-items: center; gap: 8px;
+      box-shadow: 0 8px 32px rgba(250,204,21,0.3);
+    }
+    .about-badge svg { width: 18px; height: 18px; }
+    @media (max-width: 880px) {
+      .about-grid { grid-template-columns: 1fr; gap: 30px; }
+      .about-photo { max-width: 480px; margin: 0 auto; }
+    }
+
+    /* ── FAQ ────────────────────────────────────────────── */
+    .faq-section { margin: 100px auto 0; max-width: 820px; }
+    .faq-section-title { text-align: center; font-size: clamp(1.7rem, 4vw, 2.4rem); font-weight: 900; letter-spacing: -0.03em; margin-bottom: 36px; }
+    .faq-list { display: flex; flex-direction: column; gap: 12px; }
+    .faq-item {
+      background: #FACC15;
+      color: #000;
+      border-radius: var(--r-xl);
+      overflow: hidden;
+      animation: fadeUp 0.4s var(--ease-out) both;
+      box-shadow: 0 4px 24px rgba(250,204,21,0.08);
+    }
+    .faq-question {
+      width: 100%;
+      padding: 18px 24px;
+      background: none;
+      border: none;
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #000;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-align: left;
+      transition: background 0.2s;
+    }
+    .faq-question:hover { background: rgba(0,0,0,0.05); }
+    .faq-question-icon { width: 26px; height: 26px; border-radius: 50%; border: 1.8px solid #000; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-weight: 900; font-size: 0.78rem; }
+    .faq-question-text { flex: 1; line-height: 1.4; }
+    .faq-chevron { transition: transform 0.3s var(--ease); flex-shrink: 0; }
+    .faq-item.open .faq-chevron { transform: rotate(180deg); }
+    .faq-chevron svg { width: 20px; height: 20px; stroke: #000; stroke-width: 2.5; }
+    .faq-answer {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.35s var(--ease);
+    }
+    .faq-item.open .faq-answer { max-height: 500px; }
+    .faq-answer-inner {
+      padding: 0 24px 22px 62px;
+      font-size: 0.9rem;
+      line-height: 1.65;
+      color: rgba(0,0,0,0.85);
+    }
+    .faq-cta {
+      text-align: center;
+      margin-top: 36px;
+    }
+    .faq-cta-btn {
+      background: #FACC15;
+      color: #000;
+      border: none;
+      padding: 18px 56px;
+      border-radius: var(--r-full);
+      font-family: inherit;
+      font-size: 1.05rem;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      box-shadow: 0 12px 40px rgba(250,204,21,0.35);
+      transition: all 0.2s;
+    }
+    .faq-cta-btn:hover { transform: translateY(-2px); box-shadow: 0 16px 50px rgba(250,204,21,0.45); }
+    .faq-cta-btn:active { transform: translateY(0); }
+
+    /* ── Contact section ───────────────────────────────── */
+    .contact-section { margin: 100px auto 0; max-width: 1080px; }
+    .contact-header { text-align: center; margin-bottom: 40px; }
+    .contact-eyebrow { color: #FACC15; letter-spacing: 0.14em; text-transform: uppercase; font-size: 0.78rem; font-weight: 700; margin-bottom: 14px; animation: fadeUp 0.5s var(--ease-out) both; }
+    .contact-title { font-size: clamp(1.8rem, 4.5vw, 2.8rem); font-weight: 900; letter-spacing: -0.03em; margin-bottom: 14px; animation: fadeUp 0.5s var(--ease-out) 0.05s both; }
+    .contact-title .yellow { color: #FACC15; }
+    .contact-sub { color: var(--txt2); font-size: 1rem; max-width: 560px; margin: 0 auto; line-height: 1.6; animation: fadeUp 0.5s var(--ease-out) 0.1s both; }
+
+    /* Phone card */
+    .phone-card {
+      background: linear-gradient(135deg, #FACC15 0%, #E6B800 100%);
+      color: #000;
+      border-radius: var(--r-2xl);
+      padding: 56px 48px;
+      max-width: 600px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      animation: fadeUp 0.5s var(--ease-out) 0.15s both;
+      box-shadow: 0 20px 60px rgba(250,204,21,0.18);
+    }
+    .phone-card::before {
+      content: '';
+      position: absolute;
+      top: -40%; left: -40%;
+      width: 180%; height: 180%;
+      background: radial-gradient(circle at center, rgba(255,255,255,0.18) 0%, transparent 50%);
+      pointer-events: none;
+    }
+    .phone-icon-wrap {
+      width: 64px; height: 64px;
+      border-radius: 50%;
+      background: rgba(0,0,0,0.12);
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 18px;
+      position: relative;
+      animation: pulseRing 2s ease-out infinite;
+    }
+    @keyframes pulseRing {
+      0%   { box-shadow: 0 0 0 0 rgba(0,0,0,0.2); }
+      70%  { box-shadow: 0 0 0 16px rgba(0,0,0,0); }
+      100% { box-shadow: 0 0 0 0 rgba(0,0,0,0); }
+    }
+    .phone-icon-wrap svg { width: 28px; height: 28px; stroke: #000; stroke-width: 2; }
+    .phone-label { font-size: 0.78rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 8px; opacity: 0.7; position: relative; }
+    .phone-number {
+      font-size: clamp(2rem, 4.5vw, 2.8rem);
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      line-height: 1;
+      margin-bottom: 6px;
+      position: relative;
+      font-variant-numeric: tabular-nums;
+    }
+    .phone-prefix { font-size: 0.65em; opacity: 0.6; vertical-align: middle; margin-right: 6px; }
+    .phone-availability {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(0,0,0,0.12);
+      color: #000;
+      padding: 8px 16px;
+      border-radius: var(--r-full);
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      margin: 8px 0 24px;
+      position: relative;
+    }
+    .phone-availability-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: #16a34a;
+      box-shadow: 0 0 0 0 rgba(22,163,74,0.6);
+      animation: pulseDot 1.6s ease-out infinite;
+    }
+    @keyframes pulseDot {
+      0%   { box-shadow: 0 0 0 0 rgba(22,163,74,0.7); }
+      70%  { box-shadow: 0 0 0 10px rgba(22,163,74,0); }
+      100% { box-shadow: 0 0 0 0 rgba(22,163,74,0); }
+    }
+    .phone-cta {
+      background: #000;
+      color: #FACC15;
+      border: none;
+      padding: 16px 36px;
+      border-radius: var(--r-full);
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      display: inline-flex; align-items: center; gap: 10px;
+      text-decoration: none;
+      transition: all 0.2s;
+      position: relative;
+    }
+    .phone-cta:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(0,0,0,0.4); }
+    .phone-cta svg { width: 18px; height: 18px; stroke: currentColor; stroke-width: 2.2; }
+
+    /* Callback form */
+    .callback-card {
+      background: var(--card);
+      border: 1px solid var(--border2);
+      border-radius: var(--r-2xl);
+      padding: 36px 32px;
+      animation: fadeUp 0.5s var(--ease-out) 0.2s both;
+    }
+    .callback-card h3 { font-size: 1.25rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 6px; }
+    .callback-card p { font-size: 0.88rem; color: var(--txt2); margin-bottom: 22px; line-height: 1.55; }
+    .callback-form .form-group { margin-bottom: 14px; }
+    .callback-form .form-label { font-size: 0.78rem; margin-bottom: 6px; }
+    .callback-form .form-input {
+      background: rgba(255,255,255,0.04);
+      border-color: var(--border2);
+    }
+    .callback-form .form-input:focus { border-color: #FACC15; box-shadow: 0 0 0 3px rgba(250,204,21,0.12); }
+    .callback-submit {
+      width: 100%;
+      background: #FACC15;
+      color: #000;
+      border: none;
+      padding: 14px 24px;
+      border-radius: var(--r-md);
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+      transition: all 0.2s;
+      margin-top: 6px;
+    }
+    .callback-submit:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(250,204,21,0.3); }
+    .callback-submit:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+    .callback-submit svg { width: 16px; height: 16px; stroke: currentColor; stroke-width: 2.5; }
+    .callback-meta { font-size: 0.72rem; color: var(--txt3); margin-top: 12px; text-align: center; }
+
+    /* Success state */
+    .callback-success {
+      text-align: center;
+      padding: 40px 20px;
+    }
+    .callback-success-icon {
+      width: 72px; height: 72px;
+      border-radius: 50%;
+      background: var(--green);
+      color: #000;
+      margin: 0 auto 20px;
+      display: flex; align-items: center; justify-content: center;
+      animation: pulseSuccess 0.6s var(--bounce);
+    }
+    @keyframes pulseSuccess {
+      0%   { transform: scale(0); opacity: 0; }
+      60%  { transform: scale(1.15); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .callback-success-icon svg { width: 36px; height: 36px; stroke: currentColor; stroke-width: 3; fill: none; }
+    .callback-success h3 { font-size: 1.3rem; margin-bottom: 10px; }
+    .callback-success p { font-size: 0.9rem; color: var(--txt2); }
+
+    /* Already subscribed state */
+    .active-banner {
+      background: linear-gradient(135deg, rgba(34,197,94,0.18) 0%, var(--card) 60%);
+      border: 1px solid var(--green);
+      border-radius: var(--r-xl);
+      padding: 22px 26px;
+      max-width: 700px;
+      margin: 0 auto 32px;
+      display: flex; align-items: center; gap: 16px;
+    }
+    .active-banner-icon { width: 44px; height: 44px; border-radius: 50%; background: var(--green); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .active-banner h3 { font-size: 1rem; font-weight: 700; margin-bottom: 4px; }
+    .active-banner p { font-size: 0.85rem; color: var(--txt2); }
+  </style>
+</head>
+<body>
+
+<div class="pricing-page">
+  <header class="pricing-header">
+    <a class="pricing-logo" href="index.html">
+      <div class="pricing-logo-icon">CB</div>
+      <div>
+        <div class="pricing-logo-name">Crystal Ballers</div>
+        <div class="pricing-logo-sub">Athletic Performance</div>
+      </div>
+    </a>
+    <div style="display:flex;gap:10px;align-items:center">
+      <button class="btn btn-ghost btn-sm" id="installBtn" style="display:none" onclick="promptInstall()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Zainstaluj apkę
+      </button>
+      <span id="userArea"></span>
+    </div>
+  </header>
+
+  <!-- Already subscribed banner -->
+  <div id="activeBanner" class="hidden"></div>
+
+  <!-- Hero -->
+  <section class="pricing-hero">
+    <div class="pricing-eyebrow">Crystal Ballers Academy</div>
+    <h1 class="pricing-title">TRENING<br><span class="gold">SPORTOWCA</span></h1>
+    <p class="pricing-sub">Programy treningowe stworzone dla piłkarzy i ambitnych sportowców, którzy chcą poprawić szybkość, siłę, mobilność, regenerację i realne wyniki na boisku.</p>
+
+    <!-- Billing toggle -->
+    <div class="billing-toggle" id="billingToggle">
+      <button class="active" data-plan="monthly">Miesięcznie</button>
+      <button data-plan="yearly">Rocznie <span class="save">2 miesiące gratis!</span></button>
+    </div>
+  </section>
+
+  <!-- Subscribe card -->
+  <section style="margin-bottom:56px">
+    <div class="subscribe-card" id="subscribeCard">
+      <div class="subscribe-card-header">
+        <div class="price-display">
+          <span class="price-amount" id="priceAmount">59,99 zł</span>
+          <span class="price-period" id="pricePeriod">/ miesiąc</span>
+        </div>
+        <div class="price-note" id="priceNote">Płatność miesięczna — możesz zrezygnować w dowolnym momencie.</div>
+      </div>
+
+      <ul class="feature-list">
+        <li class="feature-item">
+          <span class="check-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+          <span>Dostęp do <strong>wszystkich 3 planów</strong> treningowych</span>
+        </li>
+        <li class="feature-item">
+          <span class="check-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+          <span><strong>Czat z trenerem</strong> — bezpośredni kontakt</span>
+        </li>
+        <li class="feature-item">
+          <span class="check-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+          <span>Dziennik treningowy + <strong>monitoring wyników</strong></span>
+        </li>
+        <li class="feature-item">
+          <span class="check-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+          <span>Wykresy progresu i <strong>rekordy życiowe</strong></span>
+        </li>
+        <li class="feature-item">
+          <span class="check-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+          <span>Aplikacja — <strong>działa na telefonie i PC</strong></span>
+        </li>
+        <li class="feature-item">
+          <span class="check-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+          <span>Aktualizacje treści — <strong>na bieżąco dodajemy nowe ćwiczenia i metody treningowe</strong></span>
+        </li>
+      </ul>
+
+      <button class="btn btn-primary btn-full btn-lg" id="subscribeBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" width="18" height="18"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+        Aktywuj subskrypcję
+      </button>
+
+      <p class="footer-note">
+        🔒 Bezpieczna płatność · BLIK, karta, Apple Pay, Google Pay<br>
+        Anulujesz kiedy chcesz — dostęp utrzymujesz do końca opłaconego okresu.
+      </p>
+    </div>
+  </section>
+
+  <!-- 3 plans showcase -->
+  <section>
+    <div style="text-align:center;margin-bottom:24px">
+      <h2 style="font-size:1.4rem;font-weight:800;letter-spacing:-0.02em">3 kompletne plany w cenie subskrypcji</h2>
+      <p style="font-size:0.875rem;color:var(--txt2);margin-top:6px">Każdy plan to 12 tygodni programu — 3 fazy treningowe, dziesiątki ćwiczeń z opisami.</p>
+    </div>
+    <div class="plans-showcase" id="plansShowcase"></div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 4-Pillar grid: SIŁA · SZYBKOŚĆ · SYLWETKA · REGENERACJA -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <section class="pillars-section">
+    <div class="pillars-grid">
+      <!-- LEWA KOLUMNA -->
+      <div class="pillars-col">
+        <div class="pillar" style="animation-delay:0.05s">
+          <div class="pillar-head">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg>
+            <div class="pillar-title">1. SIŁA</div>
+          </div>
+          <p class="pillar-text">Bez siły nie zbudujesz nic. To fundament, na którym opierają się szybkość, moc i wytrzymałość — każdy kolejny element przygotowania motorycznego zaczyna się właśnie tutaj. W naszym podejściu liczy się jednak nie kilogram na sztandze, tylko to, ile z tej siły zawodnik faktycznie wykorzysta na boisku.</p>
+        </div>
+        <div class="pillar" style="animation-delay:0.15s">
+          <div class="pillar-head">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg>
+            <div class="pillar-title">2. SZYBKOŚĆ</div>
+          </div>
+          <p class="pillar-text">Szybkość rozstrzyga większość sportowych pojedynków. Pierwszy krok, czas reakcji, akceleracja na pierwszych pięciu metrach. To one decydują, kto wygrywa piłkę.</p>
+        </div>
+      </div>
+
+      <!-- CENTER LOGO -->
+      <div class="pillars-center">
+        <div class="pillars-logo">
+          <svg viewBox="0 0 120 120" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Stylized crystal/diamond -->
+            <path d="M60 18 L40 42 L60 102 L80 42 Z"/>
+            <path d="M40 42 L60 56 L80 42"/>
+            <path d="M60 18 L60 56"/>
+            <path d="M28 50 L40 42 L60 102 L28 50 Z" opacity="0.6"/>
+            <path d="M92 50 L80 42 L60 102 L92 50 Z" opacity="0.6"/>
+          </svg>
+        </div>
+        <div class="pillars-logo-text">
+          <div class="pillars-logo-name">Crystal Ballers</div>
+          <div class="pillars-logo-sub">ACADEMY</div>
+        </div>
+      </div>
+
+      <!-- PRAWA KOLUMNA -->
+      <div class="pillars-col">
+        <div class="pillar" style="animation-delay:0.1s">
+          <div class="pillar-head">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg>
+            <div class="pillar-title">3. SYLWETKA</div>
+          </div>
+          <p class="pillar-text">Pracujemy nad tym, żeby zawodnik wyglądał jak ktoś, kto poważnie trenuje — i żeby ta sylwetka faktycznie pracowała w jego dyscyplinie, a nie tylko na zdjęciach.</p>
+        </div>
+        <div class="pillar" style="animation-delay:0.2s">
+          <div class="pillar-head">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg>
+            <div class="pillar-title">4. REGENERACJA</div>
+          </div>
+          <p class="pillar-text">Bez niej nawet najlepiej zaplanowane jednostki nie przyniosą efektu. Uczymy zawodników zarządzać snem, odżywianiem i obciążeniem treningowym w taki sposób, żeby utrzymać wysoką dyspozycję przez cały sezon.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- O MNIE                                              -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <section class="about-section">
+    <div class="about-grid">
+      <div class="about-content">
+        <h2 class="about-title">O MNIE</h2>
+        <p class="about-text">Cześć! Nazywam się <strong>Jakub Bajołek</strong> i zajmuję się przygotowaniem motorycznym sportowców. Specjalizuję się głównie w przygotowaniu piłkarzy i to z nimi najwięcej pracuję. Dzięki mojemu indywidualnemu podejściu i stosowaniu technik, których nauczyłem się podczas kursów z przygotowania motorycznego, setki piłkarzy osiągnęło sukces i zrobiło życiową formę. Posiadam certyfikat trenera przygotowania motorycznego oraz działam w branży od paru lat, moje doświadczenia pozwoliło mi dojść do momentu, w którym dokładnie wiem „co działa, a co nie." — dzięki czemu podejmując współpracę ze mną masz to jak w banku, że osiągniesz swoje cele!</p>
+        <p class="about-text"><strong>Ważna rzecz...</strong> Sam jestem aktywnym sportowcem i każdy plan treningowy, który układam, wcześniej testuję na własnej skórze. Nie jestem trenerem, który zna temat tylko z książek i kursów. <strong>Moje efekty widać na mnie jak i na moich zawodnikach.</strong> Dzięki temu, podejmując współpracę ze mną, masz to jak w banku, że osiągniesz swoje cele!</p>
+      </div>
+
+      <div class="about-photo">
+        <img src="IMG_5744.webp" alt="Jakub Bajołek — trener przygotowania motorycznego" loading="lazy">
+        <div class="about-badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/><path d="M14.31 8L20.05 17.94"/><path d="M9.69 8h11.48"/><path d="M7.38 12l5.74-9.94"/><path d="M9.69 16L3.95 6.06"/><path d="M14.31 16H2.83"/><path d="M16.62 12l-5.74 9.94"/>
+          </svg>
+          TRENER TEŻ GRA
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- FAQ                                                 -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <section class="faq-section">
+    <h2 class="faq-section-title">Często zadawane pytania...</h2>
+
+    <div class="faq-list" id="faqList">
+      <div class="faq-item">
+        <button class="faq-question">
+          <span class="faq-question-icon">?</span>
+          <span class="faq-question-text">Czy ten program jest dla mnie, jeśli dopiero zaczynam?</span>
+          <span class="faq-chevron"><svg viewBox="0 0 24 24" fill="none"><polyline points="6 9 12 15 18 9"/></svg></span>
+        </button>
+        <div class="faq-answer"><div class="faq-answer-inner">Tak. Programy Crystal Ballers są stworzone zarówno dla początkujących, jak i bardziej zaawansowanych zawodników. Każdy trening ma jasno rozpisaną strukturę, dokładne instrukcje i progresję, dzięki czemu możesz zacząć ze swojego poziomu i systematycznie iść wyżej, bez chaosu i zgadywania</div></div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question">
+          <span class="faq-question-icon">?</span>
+          <span class="faq-question-text">Gram już w klubie. Czy mogę robić ten program razem z treningami drużynowymi?</span>
+          <span class="faq-chevron"><svg viewBox="0 0 24 24" fill="none"><polyline points="6 9 12 15 18 9"/></svg></span>
+        </button>
+        <div class="faq-answer"><div class="faq-answer-inner">Tak i właśnie z myślą o takich zawodnikach powstała większość naszych planów. Programy są budowane tak, żeby rozwijać Twoje parametry motoryczne bez przeciążania organizmu i bez psucia świeżości na treningach klubowych czy meczach.</div></div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question">
+          <span class="faq-question-icon">?</span>
+          <span class="faq-question-text">Ile czasu potrzebuję na trening?</span>
+          <span class="faq-chevron"><svg viewBox="0 0 24 24" fill="none"><polyline points="6 9 12 15 18 9"/></svg></span>
+        </button>
+        <div class="faq-answer"><div class="faq-answer-inner">Większość jednostek zajmuje od 45 do 75 minut, w zależności od programu i dnia treningowego. Program jest zaprojektowany tak, żeby dało się go realnie wdrożyć obok szkoły, pracy, treningów klubowych i codziennych obowiązków.</div></div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question">
+          <span class="faq-question-icon">?</span>
+          <span class="faq-question-text">Czy potrzebuję dostępu do siłowni?</span>
+          <span class="faq-chevron"><svg viewBox="0 0 24 24" fill="none"><polyline points="6 9 12 15 18 9"/></svg></span>
+        </button>
+        <div class="faq-answer"><div class="faq-answer-inner">Nie zawsze. Programy można realizować w domu, na boisku z podstawowym sprzętem</div></div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question">
+          <span class="faq-question-icon">?</span>
+          <span class="faq-question-text">Jak szybko zobaczę pierwsze efekty?</span>
+          <span class="faq-chevron"><svg viewBox="0 0 24 24" fill="none"><polyline points="6 9 12 15 18 9"/></svg></span>
+        </button>
+        <div class="faq-answer"><div class="faq-answer-inner">Pierwsze różnice większość zawodników zauważa już po 2-3 tygodniach regularnej pracy. Lepsza dynamika, większa kontrola ruchu, więcej energii i lepsze czucie własnego ciała to najczęstsze pierwsze efekty. Największe zmiany przychodzą przy konsekwentnym treningu przez 8-12 tygodni.</div></div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question">
+          <span class="faq-question-icon">?</span>
+          <span class="faq-question-text">Czy program pomoże mi być szybszym na boisku?</span>
+          <span class="faq-chevron"><svg viewBox="0 0 24 24" fill="none"><polyline points="6 9 12 15 18 9"/></svg></span>
+        </button>
+        <div class="faq-answer"><div class="faq-answer-inner">Tak. Duża część naszych metod skupia się na realnych parametrach meczowych: pierwsze metry, przyspieszenie, zmiana kierunku, eksplozywność, koordynacja i efektywne poruszanie się. Nie trenujesz „pod wygląd”, tylko pod przewagę sportową.</div></div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question">
+          <span class="faq-question-icon">?</span>
+          <span class="faq-question-text">Mam 13-16 lat. Czy to jest bezpieczne?</span>
+          <span class="faq-chevron"><svg viewBox="0 0 24 24" fill="none"><polyline points="6 9 12 15 18 9"/></svg></span>
+        </button>
+        <div class="faq-answer"><div class="faq-answer-inner">Tak, pod warunkiem wykonywania ćwiczeń zgodnie z instrukcjami. Programy są tworzone z naciskiem na technikę, kontrolę ruchu, stabilizację i zdrowy rozwój młodego zawodnika.</div></div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question">
+          <span class="faq-question-icon">?</span>
+          <span class="faq-question-text">Co jeśli miałem kontuzję albo wracam po przerwie?</span>
+          <span class="faq-chevron"><svg viewBox="0 0 24 24" fill="none"><polyline points="6 9 12 15 18 9"/></svg></span>
+        </button>
+        <div class="faq-answer"><div class="faq-answer-inner">W większości przypadków możesz korzystać z programu, ale jeśli jesteś świeżo po urazie, zawsze warto skonsultować powrót z fizjoterapeutą lub lekarzem. W programach znajdziesz też elementy mobilności i budowania odporności na urazy.</div></div>
+      </div>
+    </div>
+
+    <div class="faq-cta">
+      <button class="faq-cta-btn" onclick="document.getElementById('subscribeCard').scrollIntoView({behavior:'smooth', block:'center'})">Wchodzę w to!</button>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- KONTAKT — telefon + formularz oddzwonienia          -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <section class="contact-section">
+    <div class="contact-header">
+      <div class="contact-eyebrow">Pomoc</div>
+      <h2 class="contact-title">Nie jesteś pewien? <span class="yellow">Zadzwoń.</span></h2>
+      <p class="contact-sub">Odpowiem na każde pytanie o plan, treningi, sprzęt czy współpracę.</p>
+    </div>
+
+    <div class="phone-card">
+      <div class="phone-icon-wrap">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+      </div>
+      <div class="phone-label">Trener Jakub · Crystal Ballers</div>
+      <a href="tel:+48602545517" class="phone-number" style="text-decoration:none; color:inherit">
+        <span class="phone-prefix">+48</span>602 545 517
+      </a>
+      <div class="phone-availability">
+        <span class="phone-availability-dot"></span>
+        Dostępny 24/7
+      </div>
+      <a href="tel:+48602545517" class="phone-cta">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+        ZADZWOŃ TERAZ
+      </a>
+    </div>
+  </section>
+
+  <div class="footer-note" style="margin-top:48px">
+    Pytania? <a href="mailto:akademiacrystalballers@gmail.com">akademiacrystalballers@gmail.com</a> &nbsp;·&nbsp; © 2026 Crystal Ballers
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- PLAN DETAIL MODAL                                    -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="planDetailModal">
+  <div class="modal" style="max-width:640px">
+    <div class="modal-header">
+      <h2 class="modal-title" id="planDetailModalTitle">Plan</h2>
+      <button class="modal-close" data-close-modal>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div id="planDetailContent"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- STRIPE PAYMENT MODAL                                 -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="stripeModal">
+  <div class="modal" style="max-width:520px">
+    <div class="modal-header">
+      <h2 class="modal-title">Płatność</h2>
+      <button class="modal-close" data-close-modal>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <!-- Stripe Elements wstawi tu formularz -->
+    <div id="stripeFormBox">
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--r-md);padding:14px 16px;margin-bottom:18px">
+        <div style="display:flex;justify-content:space-between;align-items:center;font-size:0.88rem">
+          <span class="text-muted">Subskrypcja</span>
+          <strong id="stripeAmountLabel">59,99 zł / mies</strong>
+        </div>
+        <div style="font-size:0.75rem;color:var(--txt3);margin-top:4px">Anulujesz w dowolnym momencie. Bezpieczna płatność przez Stripe.</div>
+      </div>
+
+      <div id="payment-element" style="margin-bottom:18px"></div>
+
+      <div id="stripeError" style="display:none; color:var(--red); font-size:0.85rem; padding:10px 14px; background:var(--red2); border:1px solid rgba(239,68,68,0.25); border-radius:var(--r-md); margin-bottom:14px"></div>
+
+      <button id="stripeSubmitBtn" class="btn btn-primary btn-full btn-lg">
+        <span id="stripeBtnText">Zapłać i aktywuj</span>
+        <span id="stripeSpinner" class="spinner hidden"></span>
+      </button>
+
+      <div style="text-align:center;margin-top:14px;font-size:0.72rem;color:var(--txt3)">
+        🔒 Twoje dane karty są szyfrowane i przetwarzane przez Stripe<br>
+        Bezpieczne płatności • PCI-DSS Level 1
+      </div>
+    </div>
+
+    <!-- Success state -->
+    <div id="stripeSuccessBox" style="display:none; text-align:center; padding:24px 0">
+      <div style="width:72px;height:72px;border-radius:50%;background:var(--green);color:#000;margin:0 auto 18px;display:flex;align-items:center;justify-content:center">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" width="36" height="36"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <h3 style="font-size:1.4rem;margin-bottom:8px">Płatność udana!</h3>
+      <p style="color:var(--txt2)">Aktywujemy Twój dostęp... za chwilę zostaniesz przekierowany.</p>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://js.stripe.com/v3/"></script>
+<script src="js/config.js"></script>
+<script src="js/data.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/icons.js"></script>
+<script src="js/plans-data.js"></script>
+<script src="js/app.js"></script>
+<script>
+(async () => {
+  // Załaduj plany (publicznie) + sprawdź czy zalogowany
+  await CB.bootstrapPublic();
+  const session = await Auth.getSession();
+  if (session) await CB.bootstrap();
+
+  if (!session) {
+    document.getElementById('userArea').innerHTML = `
+      <a href="index.html" class="btn btn-ghost btn-sm">Zaloguj</a>
+      <a href="signup.html" class="btn btn-primary btn-sm" style="margin-left:8px">Załóż konto</a>
+    `;
+  } else {
+    const user = Auth.getUser();
+    if (user) {
+      document.getElementById('userArea').innerHTML = `
+        <span class="text-muted text-sm" style="margin-right:10px">${user.firstName}</span>
+        <a href="${user.role==='admin'?'admin/dashboard.html':'player/dashboard.html'}" class="btn btn-ghost btn-sm">Mój panel</a>
+      `;
+      if (CB.hasActiveSubscription(user) && user.role !== 'admin') {
+        const endDate = user.subscriptionEndDate ? new Date(user.subscriptionEndDate).toLocaleDateString('pl-PL') : '—';
+        const planLabel = user.subscriptionPlan === 'yearly' ? 'roczna' : 'miesięczna';
+        document.getElementById('activeBanner').className = 'active-banner';
+        document.getElementById('activeBanner').innerHTML = `
+          <div class="active-banner-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5" width="22" height="22"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div style="flex:1">
+            <h3>Masz aktywną subskrypcję (${planLabel})</h3>
+            <p>Następne odnowienie / wygaśnięcie: <strong>${endDate}</strong></p>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <a href="player/plan.html" class="btn btn-primary btn-sm">Przejdź do planów</a>
+            <button class="btn btn-ghost btn-sm" onclick="openCustomerPortal()">Zarządzaj subskrypcją</button>
+          </div>
+        `;
+        document.getElementById('subscribeCard').style.opacity = '0.5';
+        document.getElementById('subscribeBtn').textContent = 'Subskrypcja aktywna';
+        document.getElementById('subscribeBtn').disabled = true;
+      }
+
+      // Po powrocie z 3D Secure (return_url): odśwież subskrypcję
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('stripe_success') === '1') {
+        showToast('Płatność zaksięgowana. Aktywuję dostęp...');
+        setTimeout(async () => {
+          CB.reset();
+          await CB.bootstrap();
+          const u = Auth.getUser();
+          if (CB.hasActiveSubscription(u)) {
+            window.location.href = 'player/plan.html';
+          } else {
+            window.history.replaceState({}, '', 'pricing.html');
+            location.reload();
+          }
+        }, 2000);
+      }
+    }
+  }
+
+  // Render plans showcase
+  const plans = CB.getPlans();
+  document.getElementById('plansShowcase').innerHTML = plans.map((plan, i) => {
+    const content = (typeof PlanContent !== 'undefined') ? PlanContent.get(plan.id) : null;
+    const weeks = content?.totalWeeks || 12;
+    const phases = content?.phases?.length || 3;
+    return `
+    <div class="show-card locked" style="--plan-color:${plan.color}; animation-delay:${i*0.08}s">
+      <div class="lock-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      </div>
+      <div class="show-card-icon-wrap">${ICONS[plan.iconKey] || ''}</div>
+      <div class="show-card-eyebrow">Plan ${i+1}</div>
+      <div class="show-card-name">${plan.name}</div>
+      <div class="show-card-desc">${plan.description}</div>
+      <div class="show-card-meta">${weeks} tygodni · ${phases} fazy · dziesiątki ćwiczeń</div>
+      <button class="read-more-btn" onclick="openPlanDetail('${plan.id}')">
+        Czytaj więcej
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </button>
+    </div>`;
+  }).join('');
+
+  // Billing toggle
+  let billing = 'monthly';
+  document.querySelectorAll('#billingToggle button').forEach(b => {
+    b.addEventListener('click', () => {
+      document.querySelectorAll('#billingToggle button').forEach(x => x.classList.remove('active'));
+      b.classList.add('active');
+      billing = b.dataset.plan;
+      updatePrice();
+    });
+  });
+  function updatePrice() {
+    if (billing === 'yearly') {
+      document.getElementById('priceAmount').textContent = '49,99 zł';
+      document.getElementById('pricePeriod').textContent = '/ miesiąc';
+      document.getElementById('priceNote').innerHTML = '<strong>Płatność roczna 599,90 zł</strong> · 2 miesiące gratis względem opłaty miesięcznej';
+    } else {
+      document.getElementById('priceAmount').textContent = '59,99 zł';
+      document.getElementById('pricePeriod').textContent = '/ miesiąc';
+      document.getElementById('priceNote').textContent = 'Płatność miesięczna — możesz zrezygnować w dowolnym momencie.';
+    }
+  }
+
+  // Subscribe — prawdziwy Stripe Elements flow
+  const stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
+  let stripeElements = null;
+  let stripeClientSecret = null;
+
+  document.getElementById('subscribeBtn').addEventListener('click', async () => {
+    const sess = await Auth.getSession();
+    if (!sess) { window.location.href = 'signup.html'; return; }
+    const user = Auth.getUser();
+    if (user.role === 'admin') { showToast('Konto administracyjne ma już pełen dostęp.'); return; }
+    if (CB.hasActiveSubscription(user)) { showToast('Masz już aktywną subskrypcję.'); return; }
+
+    const btn = document.getElementById('subscribeBtn');
+    btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Przygotowuję płatność...';
+
+    try {
+      // 1) Wywołaj Edge Function → utworzy Subscription i zwróci client_secret
+      const resp = await fetch(`${SUPABASE_URL}/functions/v1/create-subscription`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${sess.access_token}`,
+          'apikey': SUPABASE_KEY,
+        },
+        body: JSON.stringify({ billing })
+      });
+      const data = await resp.json();
+      if (!resp.ok || !data.clientSecret) {
+        throw new Error(data.error || 'Nie udało się utworzyć płatności');
+      }
+      stripeClientSecret = data.clientSecret;
+
+      // 2) Pokaż modal i zamontuj Stripe Elements
+      document.getElementById('stripeAmountLabel').textContent =
+        billing === 'yearly' ? '599,90 zł / rok' : '59,99 zł / mies';
+      document.getElementById('stripeFormBox').style.display = 'block';
+      document.getElementById('stripeSuccessBox').style.display = 'none';
+      document.getElementById('stripeError').style.display = 'none';
+
+      stripeElements = stripe.elements({
+        clientSecret: stripeClientSecret,
+        appearance: {
+          theme: 'night',
+          variables: {
+            colorPrimary: '#C8A45A',
+            colorBackground: '#0d0d10',
+            colorText: '#f0f0f4',
+            colorDanger: '#ef4444',
+            fontFamily: 'Inter, system-ui, sans-serif',
+            borderRadius: '10px',
+          },
+        },
+      });
+      const paymentEl = stripeElements.create('payment', {
+        layout: 'tabs',
+      });
+      paymentEl.mount('#payment-element');
+
+      openModal('stripeModal');
+
+      btn.disabled = false; btn.textContent = 'Aktywuj subskrypcję';
+    } catch (e) {
+      btn.disabled = false;
+      btn.textContent = 'Aktywuj subskrypcję';
+      showToast('Błąd: ' + e.message, 'error');
+    }
+  });
+
+  // Stripe Submit — potwierdź płatność
+  document.getElementById('stripeSubmitBtn').addEventListener('click', async () => {
+    if (!stripeElements || !stripeClientSecret) return;
+
+    const submitBtn = document.getElementById('stripeSubmitBtn');
+    const btnText = document.getElementById('stripeBtnText');
+    const spinner = document.getElementById('stripeSpinner');
+    const errBox = document.getElementById('stripeError');
+
+    submitBtn.disabled = true;
+    btnText.textContent = 'Przetwarzanie...';
+    spinner.classList.remove('hidden');
+    errBox.style.display = 'none';
+
+    // Stripe wymaga prawidłowego URL — fallback gdy uruchamiamy z file://
+    let returnUrl;
+    if (window.location.protocol === 'http:' || window.location.protocol === 'https:') {
+      returnUrl = window.location.origin + window.location.pathname + '?stripe_success=1';
+    } else {
+      // file:// → użyj publicznej domeny (do której strona finalnie trafi)
+      returnUrl = 'https://crystalballers.pl/pricing.html?stripe_success=1';
+    }
+
+    const { error, paymentIntent } = await stripe.confirmPayment({
+      elements: stripeElements,
+      redirect: 'if_required',
+      confirmParams: {
+        return_url: returnUrl,
+      }
+    });
+
+    if (error) {
+      // Card error, validation error, network error
+      submitBtn.disabled = false;
+      btnText.textContent = 'Zapłać i aktywuj';
+      spinner.classList.add('hidden');
+      errBox.textContent = error.message || 'Nie udało się przetworzyć płatności';
+      errBox.style.display = 'block';
+      return;
+    }
+
+    if (paymentIntent && paymentIntent.status === 'succeeded') {
+      // Płatność OK — pokaż success, poczekaj na webhook, przekieruj
+      document.getElementById('stripeFormBox').style.display = 'none';
+      document.getElementById('stripeSuccessBox').style.display = 'block';
+
+      // Daj webhookowi 2-3 sek na update DB, potem reload do dashboardu
+      setTimeout(async () => {
+        CB.reset();
+        await CB.bootstrap();
+        const user = Auth.getUser();
+        if (CB.hasActiveSubscription(user)) {
+          window.location.href = 'player/plan.html';
+        } else {
+          // Webhook się jeszcze nie wykonał — pokaż info
+          showToast('Płatność zaksięgowana — odśwież stronę za chwilę.');
+          setTimeout(() => window.location.reload(), 2500);
+        }
+      }, 2500);
+    }
+  });
+
+  // Otwórz Stripe Customer Portal (zarządzanie sub. — anulowanie, zmiana karty, faktury)
+  window.openCustomerPortal = async function() {
+    const sess = await Auth.getSession();
+    if (!sess) return;
+    showToast('Przekierowywanie do Stripe...');
+    try {
+      const resp = await fetch(`${SUPABASE_URL}/functions/v1/customer-portal`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${sess.access_token}`,
+          'apikey': SUPABASE_KEY,
+        },
+        body: JSON.stringify({ returnUrl: window.location.href })
+      });
+      const data = await resp.json();
+      if (!resp.ok || !data.url) throw new Error(data.error || 'Nie udało się otworzyć portalu');
+      window.location.href = data.url;
+    } catch(e) { showToast('Błąd: ' + e.message, 'error'); }
+  };
+
+  // ── Plan detail modal ──────────────────────────────────
+  window.openPlanDetail = function(planId) {
+    const plan = CB.getPlanById(planId);
+    if (!plan) return;
+    const content = (typeof PlanContent !== 'undefined') ? PlanContent.get(planId) : null;
+    const desc = content?.intro || plan.description;
+    const weeks = content?.totalWeeks || 12;
+    const phases = content?.phases || [];
+    const totalWorkouts = phases.reduce((s, ph) => s + (ph.workouts?.length || 0), 0);
+
+    document.getElementById('planDetailModalTitle').textContent = plan.name;
+
+    document.getElementById('planDetailContent').innerHTML = `
+      <div class="plan-detail-hero" style="--plan-color:${plan.color}">
+        <div class="plan-detail-icon">${ICONS[plan.iconKey] || ''}</div>
+        <div>
+          <div class="plan-detail-eyebrow">${content?.structure || 'Plan treningowy'}</div>
+          <div class="plan-detail-name">${plan.name}</div>
+        </div>
+      </div>
+
+      <div class="plan-detail-desc">${desc}</div>
+
+      <div class="plan-detail-stats" style="--plan-color:${plan.color}">
+        <div class="plan-detail-stat">
+          <div class="num">${weeks}</div>
+          <div class="lbl">Tygodni</div>
+        </div>
+        <div class="plan-detail-stat">
+          <div class="num">${phases.length || 3}</div>
+          <div class="lbl">Faz</div>
+        </div>
+        <div class="plan-detail-stat">
+          <div class="num">${totalWorkouts || '—'}</div>
+          <div class="lbl">Treningów</div>
+        </div>
+      </div>
+
+      ${phases.length ? `
+        <div class="plan-detail-phases-title">Struktura programu</div>
+        ${phases.map((ph, i) => `
+          <div class="plan-detail-phase" style="--plan-color:${plan.color}">
+            <div class="plan-detail-phase-num">${ph.num || i+1}</div>
+            <div class="plan-detail-phase-body">
+              <div class="plan-detail-phase-name">${ph.name} — ${ph.focus}</div>
+              <div class="plan-detail-phase-focus">${ph.weeks} tygodni · ${ph.workouts?.length || 0} treningi</div>
+            </div>
+          </div>
+        `).join('')}
+      ` : ''}
+
+      ${plan.benefits && plan.benefits.length ? `
+        <div class="plan-benefits">
+          <div class="plan-benefits-title">${plan.benefitsTitle || 'Co zyskasz dzięki temu programowi?'}</div>
+          <ul class="plan-benefits-list">
+            ${plan.benefits.map(b => `
+              <li class="plan-benefit-item">
+                <span class="plan-benefit-check">
+                  <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                </span>
+                <span class="plan-benefit-text">${b}</span>
+              </li>
+            `).join('')}
+          </ul>
+        </div>
+      ` : ''}
+
+      <button class="modal-cta-dolaczam" onclick="closeModal('planDetailModal'); document.getElementById('subscribeCard').scrollIntoView({behavior:'smooth',block:'center'})">
+        DOŁĄCZAM!
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </button>
+    `;
+    openModal('planDetailModal');
+  };
+
+  // ── FAQ accordion ──────────────────────────────────────
+  document.querySelectorAll('.faq-question').forEach((q, i) => {
+    q.addEventListener('click', () => {
+      const item = q.closest('.faq-item');
+      const wasOpen = item.classList.contains('open');
+      document.querySelectorAll('.faq-item.open').forEach(o => { if (o !== item) o.classList.remove('open'); });
+      item.classList.toggle('open', !wasOpen);
+    });
+    q.closest('.faq-item').style.animationDelay = (i * 0.05) + 's';
+  });
+
+})().catch(e => { console.error(e); alert('Błąd ładowania: ' + e.message); });
+</script>
+</body>
+</html>

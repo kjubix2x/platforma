@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#07070a">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/svg+xml" href="icon.svg">
+  <link rel="apple-touch-icon" href="icon-192.svg">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Crystal Ballers">
+  <title>Rejestracja — Crystal Ballers</title>
+  <link rel="stylesheet" href="css/main.css">
+  <style>
+    .login-bg-grid { position: fixed; inset: 0; z-index: 0; background-image: linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px); background-size: 48px 48px; mask-image: radial-gradient(ellipse at center, black 20%, transparent 70%); }
+    .pw-wrap { position: relative; }
+    .pw-wrap .form-input { padding-right: 44px; }
+    .pass-toggle { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--txt3); }
+    .pass-toggle:hover { color: var(--txt2); }
+    .pass-toggle svg { width: 18px; height: 18px; }
+    .login-bottom { text-align: center; margin-top: 28px; font-size: 0.75rem; color: var(--txt3); }
+    .login-card { max-width: 460px; }
+    .signin-link { display: block; text-align: center; margin-top: 18px; font-size: 0.85rem; color: var(--txt2); }
+    .signin-link a { color: var(--gold); font-weight: 600; }
+    .signin-link a:hover { text-decoration: underline; }
+    .terms { font-size: 0.74rem; color: var(--txt3); margin-top: 14px; line-height: 1.55; }
+    .terms a { color: var(--txt2); text-decoration: underline; }
+  </style>
+</head>
+<body class="login-body">
+  <div class="login-bg-grid"></div>
+  <div class="login-bg-orb orb1"></div>
+  <div class="login-bg-orb orb2"></div>
+
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="login-logo-icon">CB</div>
+      <div>
+        <div class="login-logo-name">Crystal Ballers</div>
+        <div class="login-logo-sub">Athletic Performance</div>
+      </div>
+    </div>
+
+    <h1 class="login-title">Załóż konto</h1>
+    <p class="login-sub">Rejestracja jest darmowa. Po założeniu konta wybierzesz plan subskrypcji.</p>
+
+    <form id="signupForm" novalidate>
+      <div class="form-row">
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label">Imię</label>
+          <input class="form-input" type="text" id="firstName" placeholder="Jan" autocomplete="given-name" required>
+        </div>
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label">Nazwisko</label>
+          <input class="form-input" type="text" id="lastName" placeholder="Kowalski" autocomplete="family-name" required>
+        </div>
+      </div>
+
+      <div class="form-group mt-16">
+        <label class="form-label" for="email">Adres e-mail</label>
+        <input class="form-input" type="email" id="email" placeholder="twoj@email.pl" autocomplete="email" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="password">Hasło <span class="text-dim text-xs">— min. 6 znaków</span></label>
+        <div class="pw-wrap">
+          <input class="form-input" type="password" id="password" placeholder="••••••••" autocomplete="new-password" minlength="6" required>
+          <button type="button" class="pass-toggle" id="passToggle" tabindex="-1" aria-label="Pokaż hasło">
+            <svg id="eyeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="form-error" id="globalErr" style="margin-bottom:16px; font-size:0.875rem; padding:12px 14px; background:var(--red2); border:1px solid rgba(239,68,68,0.25); border-radius:var(--r-md);"></div>
+
+      <button class="btn btn-primary btn-full btn-lg" type="submit" id="signupBtn">
+        <span id="btnText">Załóż konto</span>
+        <span id="signupSpinner" class="spinner hidden"></span>
+      </button>
+
+      <p class="terms">
+        Klikając „Załóż konto" akceptujesz <a href="#">regulamin</a> i <a href="#">politykę prywatności</a> Crystal Ballers.
+      </p>
+    </form>
+
+    <p class="signin-link">Masz już konto? <a href="index.html">Zaloguj się</a></p>
+
+    <div class="login-bottom">© 2026 Crystal Ballers. Wszelkie prawa zastrzeżone.</div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/config.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    // Redirect jeśli już zalogowany
+    (async () => {
+      const s = await Auth.getSession();
+      if (s) {
+        await CB.bootstrap();
+        const u = CB.getCurrentUser();
+        if (u) window.location.href = u.role === 'admin' ? 'admin/dashboard.html' : 'pricing.html';
+      }
+    })();
+
+    const form = document.getElementById('signupForm');
+    const globalErr = document.getElementById('globalErr');
+    const btn = document.getElementById('signupBtn');
+    const btnTxt = document.getElementById('btnText');
+    const spinner = document.getElementById('signupSpinner');
+
+    document.getElementById('passToggle').addEventListener('click', () => {
+      const p = document.getElementById('password');
+      const isPass = p.type === 'password';
+      p.type = isPass ? 'text' : 'password';
+      document.getElementById('eyeIcon').innerHTML = isPass
+        ? `<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/>`
+        : `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>`;
+    });
+
+    form.addEventListener('submit', async e => {
+      e.preventDefault();
+      globalErr.style.display = 'none';
+      const firstName = document.getElementById('firstName').value.trim();
+      const lastName  = document.getElementById('lastName').value.trim();
+      const email     = document.getElementById('email').value.trim();
+      const password  = document.getElementById('password').value;
+
+      btn.disabled = true; btnTxt.textContent = 'Tworzenie konta...'; spinner.classList.remove('hidden');
+
+      const result = await Auth.signup({ email, password, firstName, lastName });
+      btn.disabled = false; btnTxt.textContent = 'Załóż konto'; spinner.classList.add('hidden');
+
+      if (!result.ok) {
+        globalErr.textContent = result.error;
+        globalErr.style.display = 'block';
+        return;
+      }
+      window.location.href = 'pricing.html';
+    });
+  </script>
+</body>
+</html>

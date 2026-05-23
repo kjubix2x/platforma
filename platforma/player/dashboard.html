@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#07070a">
+  <link rel="manifest" href="../manifest.json">
+  <link rel="icon" type="image/svg+xml" href="../icon.svg">
+  <link rel="apple-touch-icon" href="../icon-192.svg">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Dashboard — Crystal Ballers</title>
+  <link rel="stylesheet" href="../css/main.css">
+  <style>
+    .dashboard-grid { display: grid; grid-template-columns: 1fr 340px; gap: 20px; }
+    .recovery-bar-wrap { margin-top: 14px; }
+    .recovery-label { display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 8px; }
+    .next-training-info h3 { font-size: 1rem; font-weight: 700; margin-bottom: 4px; }
+    .next-training-info p  { font-size: 0.8rem; color: var(--txt2); }
+    .activity-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .activity-item { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+    .activity-item:last-child { border-bottom: none; }
+    .activity-item-body { flex: 1; }
+    .activity-item-title { font-size: 0.875rem; font-weight: 500; }
+    .activity-item-time  { font-size: 0.75rem; color: var(--txt3); margin-top: 2px; }
+    .week-days { display: flex; gap: 8px; }
+    .week-day {
+      flex: 1; text-align: center; padding: 10px 4px;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      font-size: 0.72rem; color: var(--txt3);
+    }
+    .week-day .day-name { margin-bottom: 6px; font-weight: 500; }
+    .week-day .day-dot  { width: 8px; height: 8px; border-radius: 50%; background: var(--border2); margin: 0 auto; }
+    .week-day.done      { border-color: rgba(34,197,94,0.3); background: var(--green2); color: var(--green); }
+    .week-day.done .day-dot { background: var(--green); }
+    .week-day.today     { border-color: rgba(200,164,90,0.4); background: var(--gold2); color: var(--gold); }
+    .week-day.today .day-dot { background: var(--gold); }
+    @media (max-width: 900px) {
+      .dashboard-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body class="app-body">
+
+<!-- Sidebar -->
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <a class="sidebar-logo" href="dashboard.html">
+      <div class="sidebar-logo-icon">CB</div>
+      <div>
+        <div class="sidebar-logo-name">Crystal Ballers</div>
+        <div class="sidebar-logo-sub">Athletic Performance</div>
+      </div>
+    </a>
+  </div>
+
+  <div class="sidebar-nav">
+    <a class="nav-link" href="dashboard.html">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      Dashboard
+    </a>
+    <a class="nav-link" href="plan.html">
+      <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      Mój Plan
+    </a>
+    <a class="nav-link" href="journal.html">
+      <svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+      Dziennik
+    </a>
+    <a class="nav-link" href="chat.html">
+      <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      Wiadomości
+      <span class="nav-badge hidden" id="msgBadge">0</span>
+    </a>
+    <a class="nav-link" href="performance.html">
+      <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      Wyniki
+    </a>
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="sidebar-user" id="sidebarUser"></div>
+  </div>
+</nav>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- Main -->
+<main class="main-content">
+  <header class="page-header">
+    <button class="hamburger" id="hamburger">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+    <h1>Dashboard</h1>
+    <div class="page-header-actions">
+      <span id="headerDate" class="text-muted text-sm"></span>
+    </div>
+  </header>
+
+  <div class="content">
+    <!-- Welcome -->
+    <div class="welcome-banner" id="welcomeBanner">
+      <div class="welcome-greeting">Witaj ponownie</div>
+      <div class="welcome-name" id="welcomeName">—</div>
+      <div class="welcome-sub" id="welcomeSub">Ładowanie danych...</div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid" id="statsGrid">
+      <!-- filled by JS -->
+    </div>
+
+    <!-- Week days -->
+    <div class="card mb-24">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Tydzień treningowy</div>
+          <div class="card-subtitle" id="weekLabel"></div>
+        </div>
+        <span class="badge badge-green" id="weekPctBadge">0%</span>
+      </div>
+      <div class="week-days" id="weekDays"></div>
+    </div>
+
+    <!-- Dashboard grid -->
+    <div class="dashboard-grid">
+      <!-- Left col -->
+      <div>
+        <!-- Next training -->
+        <div class="card mb-20" id="nextTrainingCard">
+          <div class="card-header">
+            <div class="card-title">Nadchodzący trening</div>
+            <span class="badge badge-gold">Jutro</span>
+          </div>
+          <div class="next-training" id="nextTrainingContent">
+            <div class="next-training-date">
+              <div class="next-training-day" id="nextDay">—</div>
+              <div class="next-training-month" id="nextMonth">—</div>
+            </div>
+            <div class="next-training-info">
+              <h3>Sesja motoryczna</h3>
+              <p>Siła / Moc / Sprint — zgodnie z planem tygodniowym</p>
+              <div class="flex gap-8 mt-12">
+                <a href="plan.html" class="btn btn-primary btn-sm">Otwórz plan</a>
+                <a href="journal.html" class="btn btn-ghost btn-sm">Zapisz trening</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent activity -->
+        <div class="card mb-20">
+          <div class="card-header">
+            <div class="card-title">Ostatnia aktywność</div>
+            <a href="journal.html" class="btn btn-ghost btn-sm">Zobacz wszystko</a>
+          </div>
+          <div id="recentActivity">
+            <div class="empty-state" style="padding:30px 0">
+              <div class="empty-state-icon">📋</div>
+              <p>Brak wpisów w dzienniku.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recovery -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Status regeneracji</div>
+            <span id="recoveryBadge" class="badge badge-green">Gotowy</span>
+          </div>
+          <div class="recovery-bar-wrap">
+            <div class="recovery-label">
+              <span class="text-sm text-muted">Poziom gotowości</span>
+              <span class="text-sm font-bold text-gold" id="recoveryPct">—%</span>
+            </div>
+            <div class="progress-bar" style="height:8px">
+              <div class="progress-bar-fill green" id="recoveryBar" style="width:0%"></div>
+            </div>
+          </div>
+          <div class="flex gap-16 mt-16" id="recoveryStats"></div>
+        </div>
+      </div>
+
+      <!-- Right col -->
+      <div>
+        <!-- Streak widget -->
+        <div class="streak-widget mb-20">
+          <div class="text-xs text-muted mb-8" style="letter-spacing:0.1em;text-transform:uppercase;font-weight:600">Seria treningowa</div>
+          <div class="streak-num" id="streakNum">0</div>
+          <div class="streak-label">dni z rzędu</div>
+          <div class="streak-days" id="streakDays"></div>
+        </div>
+
+        <!-- Progress ring -->
+        <div class="card mb-20" style="text-align:center; padding:28px">
+          <div class="card-title mb-16">Realizacja tygodnia</div>
+          <div class="progress-ring-wrap">
+            <svg class="progress-ring" width="140" height="140" id="weekRing">
+              <circle class="progress-ring-bg" cx="70" cy="70" r="54" stroke-width="8"/>
+              <circle class="progress-ring-fill" cx="70" cy="70" r="54" stroke-width="8" stroke-dasharray="339" stroke-dashoffset="339"/>
+            </svg>
+            <div class="progress-ring-label">
+              <div class="progress-ring-val text-gold" id="ringPct">0%</div>
+              <div class="progress-ring-sub">ukończono</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Messages -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Wiadomości od trenera</div>
+            <a href="chat.html" class="btn btn-ghost btn-sm">Otwórz</a>
+          </div>
+          <div id="messagesPreview">
+            <div class="empty-state" style="padding:24px 0">
+              <p>Brak nowych wiadomości.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../js/config.js"></script>
+<script src="../js/data.js"></script>
+<script src="../js/auth.js"></script>
+<script src="../js/icons.js"></script>
+<script src="../js/app.js"></script>
+<script>
+(async () => {
+if (!(await Auth.requirePlayer())) return;
+const user = Auth.getUser();
+setTimeout(() => injectSubscriptionBanner(), 100);
+
+// ── Header date ───────────────────────────────────────
+const months = ['stycznia','lutego','marca','kwietnia','maja','czerwca','lipca','sierpnia','września','października','listopada','grudnia'];
+const now = new Date();
+document.getElementById('headerDate').textContent = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
+
+// ── Welcome ───────────────────────────────────────────
+document.getElementById('welcomeName').textContent = user.name;
+if (CB.hasActiveSubscription(user)) {
+  const subStart = user.subscriptionStartDate ? new Date(user.subscriptionStartDate) : new Date();
+  const days = Math.max(1, Math.ceil((new Date() - subStart) / 86400000));
+  document.getElementById('welcomeSub').textContent = `Dzień ${days} subskrypcji · Pełen dostęp do 3 planów`;
+} else {
+  document.getElementById('welcomeSub').textContent = 'Brak aktywnej subskrypcji — odblokuj plany aby zacząć trening.';
+}
+
+// ── Sidebar ───────────────────────────────────────────
+renderSidebarUser(user);
+updateMsgBadge(user.id);
+
+// ── Stats grid ────────────────────────────────────────
+const journal = CB.getJournalByUser(user.id);
+const perfs   = CB.getPerfByUser(user.id);
+const lastPerf = perfs[perfs.length - 1];
+
+document.getElementById('statsGrid').innerHTML = `
+  <div class="stat-card stagger-1" style="--accent:var(--gold);--icon-bg:var(--gold2);--icon-clr:var(--gold)">
+    <div class="stat-card-icon"><svg viewBox="0 0 24 24"><polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
+    <div class="stat-card-label">Seria treningowa</div>
+    <div class="stat-card-value">${user.streak}</div>
+    <div class="stat-card-meta">dni z rzędu</div>
+  </div>
+  <div class="stat-card stagger-2" style="--accent:var(--green);--icon-bg:var(--green2);--icon-clr:var(--green)">
+    <div class="stat-card-icon"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+    <div class="stat-card-label">Treningi w bazie</div>
+    <div class="stat-card-value">${journal.length}</div>
+    <div class="stat-card-meta">wszystkich sesji</div>
+  </div>
+  <div class="stat-card stagger-3" style="--accent:var(--blue);--icon-bg:var(--blue2);--icon-clr:var(--blue)">
+    <div class="stat-card-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+    <div class="stat-card-label">Sprint 30m (PR)</div>
+    <div class="stat-card-value">${lastPerf ? lastPerf.sprint30m.toFixed(2) : '—'}</div>
+    <div class="stat-card-meta">sekund</div>
+  </div>
+  <div class="stat-card stagger-4" style="--accent:var(--amber);--icon-bg:rgba(245,158,11,0.1);--icon-clr:var(--amber)">
+    <div class="stat-card-icon"><svg viewBox="0 0 24 24"><path d="M18 3a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3H6a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3V6a3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3h12a3 3 0 0 0 3-3 3 3 0 0 0-3-3z"/></svg></div>
+    <div class="stat-card-label">Wyskok (PR)</div>
+    <div class="stat-card-value">${lastPerf ? lastPerf.jump : '—'}</div>
+    <div class="stat-card-meta">cm</div>
+  </div>
+`;
+
+// ── Week days ─────────────────────────────────────────
+const dayNames = ['Pon','Wt','Śr','Czw','Pt','Sob','Ndz'];
+const today = now.getDay(); // 0=Sun
+const todayIdx = today === 0 ? 6 : today - 1;
+const weekStart = new Date(now); weekStart.setDate(now.getDate() - todayIdx);
+const weekDaysEl = document.getElementById('weekDays');
+let doneCount = 0;
+const weekHtml = dayNames.map((d,i) => {
+  const dayDate = new Date(weekStart); dayDate.setDate(weekStart.getDate() + i);
+  const dateStr = dayDate.toISOString().slice(0,10);
+  const hasTrain = journal.some(j => j.date === dateStr);
+  const isToday  = i === todayIdx;
+  if (hasTrain) doneCount++;
+  let cls = isToday ? 'week-day today' : hasTrain ? 'week-day done' : 'week-day';
+  return `<div class="${cls}"><div class="day-name">${d}</div><div class="day-dot"></div></div>`;
+}).join('');
+weekDaysEl.innerHTML = weekHtml;
+const totalDays = todayIdx + 1;
+const pct = Math.round((doneCount / 7) * 100);
+document.getElementById('weekPctBadge').textContent = pct + '%';
+document.getElementById('weekLabel').textContent = `${doneCount} z 7 dni ukończonych`;
+
+// ── Progress ring ─────────────────────────────────────
+document.getElementById('ringPct').textContent = user.weekProgress + '%';
+setTimeout(() => setProgressRing('weekRing', user.weekProgress), 300);
+
+// ── Streak widget ─────────────────────────────────────
+document.getElementById('streakNum').textContent = user.streak;
+const last7 = Array.from({length:7}, (_,i) => {
+  const d = new Date(now); d.setDate(now.getDate() - (6-i));
+  const ds = d.toISOString().slice(0,10);
+  const done = journal.some(j => j.date === ds);
+  const isT  = ds === now.toISOString().slice(0,10);
+  return `<div class="streak-day ${isT?'today':done?'done':''}">${dayNames[i===6?(now.getDay()===0?6:now.getDay()-1):i].slice(0,1)}</div>`;
+}).join('');
+document.getElementById('streakDays').innerHTML = last7;
+
+// ── Next training date ────────────────────────────────
+const tomorrow = new Date(now); tomorrow.setDate(now.getDate()+1);
+const {day, month} = monthDayShort(tomorrow.toISOString().slice(0,10));
+document.getElementById('nextDay').textContent = day;
+document.getElementById('nextMonth').textContent = month;
+
+// ── Recent activity ───────────────────────────────────
+if (journal.length > 0) {
+  const items = journal.slice(0,4).map(j => `
+    <div class="activity-item">
+      <div class="activity-dot" style="background:var(--green)"></div>
+      <div class="activity-item-body">
+        <div class="activity-item-title">${j.exercises.length} ćwiczeń · RPE ${j.rpe}</div>
+        <div class="activity-item-time">${CB.formatDate(j.date)}</div>
+      </div>
+      <span class="badge badge-green">Ukończony</span>
+    </div>
+  `).join('');
+  document.getElementById('recentActivity').innerHTML = items;
+}
+
+// ── Recovery ──────────────────────────────────────────
+const lastEntry  = journal[0];
+const recovery   = lastEntry ? Math.min(100, Math.max(40, 100 - (lastEntry.rpe - 1) * 8)) : 85;
+const recovLabel = recovery >= 75 ? 'Gotowy' : recovery >= 50 ? 'Umiarkowany' : 'Odpoczynek';
+const recovClass = recovery >= 75 ? 'badge-green' : recovery >= 50 ? 'badge-gold' : 'badge-red';
+document.getElementById('recoveryBadge').className = `badge ${recovClass}`;
+document.getElementById('recoveryBadge').textContent = recovLabel;
+document.getElementById('recoveryPct').textContent = recovery + '%';
+setTimeout(() => { document.getElementById('recoveryBar').style.width = recovery + '%'; }, 300);
+document.getElementById('recoveryStats').innerHTML = `
+  <div style="text-align:center;flex:1"><div class="stat-card-value" style="font-size:1.2rem">${lastEntry ? lastEntry.rpe : '—'}</div><div class="text-xs text-muted mt-4">Ostatnie RPE</div></div>
+  <div style="text-align:center;flex:1"><div class="stat-card-value" style="font-size:1.2rem">${lastEntry ? lastEntry.feeling : '—'}/5</div><div class="text-xs text-muted mt-4">Samopoczucie</div></div>
+  <div style="text-align:center;flex:1"><div class="stat-card-value" style="font-size:1.2rem;color:var(--green)">${lastEntry ? lastEntry.bodyweight : '—'}</div><div class="text-xs text-muted mt-4">Masa ciała (kg)</div></div>
+`;
+
+// ── Messages preview ──────────────────────────────────
+const admin = CB.getUsers().find(u => u.role === 'admin');
+if (admin) {
+  const msgs = CB.getMessages(admin.id, user.id);
+  const recent = msgs.slice(-3).reverse().filter(m => m.fromId === admin.id);
+  if (recent.length > 0) {
+    document.getElementById('messagesPreview').innerHTML = recent.map(m => `
+      <div class="msg-preview">
+        <div class="msg-preview-avatar">${admin.avatarInitials}</div>
+        <div class="msg-preview-body">
+          <div class="msg-preview-name">Trener ${admin.firstName}</div>
+          <div class="msg-preview-text">${m.text}</div>
+        </div>
+        <div class="msg-preview-time">${CB.timeAgo(m.timestamp)}</div>
+        ${!m.read ? '<div class="msg-preview-unread"></div>' : ''}
+      </div>
+    `).join('');
+  }
+}
+})().catch(e => { console.error(e); alert('Błąd: '+e.message); });
+</script>
+</body>
+</html>
