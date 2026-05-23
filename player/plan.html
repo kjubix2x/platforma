@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#07070a">
+  <link rel="manifest" href="../manifest.json">
+  <link rel="icon" type="image/svg+xml" href="../icon.svg">
+  <link rel="apple-touch-icon" href="../icon-192.svg">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Plany — Crystal Ballers</title>
+  <link rel="stylesheet" href="../css/main.css">
+  <style>
+    /* Plan selector */
+    .plan-selector { display:grid; grid-template-columns:repeat(3, 1fr); gap:14px; margin-bottom:28px; }
+    @media (max-width: 880px) { .plan-selector { grid-template-columns: 1fr; } }
+    .plan-tile {
+      background:var(--card); border:1px solid var(--border);
+      border-radius:var(--r-xl); padding:18px 20px;
+      cursor:pointer; transition:all 0.2s;
+      display:flex; align-items:center; gap:14px;
+      position:relative;
+      animation: fadeUp 0.4s var(--ease-out) both;
+    }
+    .plan-tile:hover { border-color:var(--border2); transform:translateY(-2px); }
+    .plan-tile.active {
+      border-color:var(--plan-color, var(--gold));
+      background: linear-gradient(135deg, var(--card2) 0%, rgba(255,255,255,0.01) 100%);
+      box-shadow: 0 0 0 1px var(--plan-color, var(--gold)), 0 8px 32px rgba(0,0,0,0.4);
+    }
+    .plan-tile.coming-soon { opacity: 0.7; }
+    .plan-tile-icon {
+      width:48px; height:48px; border-radius:var(--r-md);
+      background:var(--bg3); border:1px solid var(--border2);
+      display:flex; align-items:center; justify-content:center;
+      color:var(--plan-color, var(--gold)); flex-shrink:0;
+    }
+    .plan-tile.active .plan-tile-icon { background: var(--plan-color, var(--gold)); color: #000; border-color: var(--plan-color); }
+    .plan-tile-icon svg { width:26px; height:26px; }
+    .plan-tile-name { font-size:0.95rem; font-weight:700; }
+    .plan-tile-meta { font-size:0.74rem; color:var(--txt3); margin-top:3px; }
+    .plan-tile-badge { position:absolute; top:8px; right:10px; font-size:0.62rem; background:rgba(245,158,11,0.18); color:#f59e0b; padding:2px 7px; border-radius:var(--r-full); font-weight:700; letter-spacing:0.06em; text-transform:uppercase; border:1px solid rgba(245,158,11,0.3); }
+
+    /* Plan hero */
+    .plan-hero {
+      background-color: var(--card);
+      border: 1px solid var(--border2);
+      border-left: 4px solid var(--plan-color, var(--gold));
+      border-radius: var(--r-2xl);
+      padding: 28px 32px;
+      margin-bottom: 24px;
+      position: relative;
+      overflow: hidden;
+      animation: fadeUp 0.5s var(--ease-out) both;
+    }
+    .plan-hero-icon {
+      position: absolute; right: 32px; top: 50%;
+      transform: translateY(-50%);
+      width: 96px; height: 96px;
+      color: var(--plan-color, var(--gold));
+      opacity: 0.35;
+      filter: drop-shadow(0 0 40px rgba(0,0,0,0.4));
+    }
+    .plan-hero-icon svg { width: 100%; height: 100%; }
+    .plan-hero-content { position: relative; z-index: 1; max-width: 70%; }
+    .plan-hero-eyebrow { font-size:0.72rem; color:var(--plan-color, var(--gold)); letter-spacing:0.14em; text-transform:uppercase; font-weight:700; margin-bottom:8px; }
+    .plan-hero-title   { font-size:1.7rem; font-weight:900; letter-spacing:-0.04em; margin-bottom:8px; }
+    .plan-hero-desc    { font-size:0.88rem; color:var(--txt2); max-width:540px; line-height:1.6; }
+    .plan-hero-meta    { display:flex; gap:18px; margin-top:18px; flex-wrap:wrap; }
+    .plan-hero-meta-item { display:flex; flex-direction:column; }
+    .plan-hero-meta-item .label { font-size:0.66rem; color:var(--txt3); text-transform:uppercase; letter-spacing:0.1em; }
+    .plan-hero-meta-item .value { font-size:0.9rem; font-weight:700; margin-top:2px; }
+
+    /* Phases */
+    .phase-tabs { display:flex; gap:4px; background:var(--card); border:1px solid var(--border); border-radius:var(--r-lg); padding:4px; margin-bottom:24px; overflow-x:auto; }
+    .phase-tab {
+      flex:1; min-width:140px; padding:13px 16px;
+      border-radius:var(--r-md); cursor:pointer; transition:all 0.2s;
+      background:none; border:none; font-family:inherit; color:var(--txt2);
+      text-align:left;
+    }
+    .phase-tab:hover:not(.active) { color:var(--txt); background:var(--card2); }
+    .phase-tab.active { background:var(--bg3); color:var(--txt); box-shadow:inset 0 0 0 1px var(--gold); }
+    .phase-tab-num { font-size:0.7rem; color:var(--txt3); text-transform:uppercase; letter-spacing:0.1em; font-weight:600; margin-bottom:4px; }
+    .phase-tab.active .phase-tab-num { color:var(--gold); }
+    .phase-tab-name { font-size:0.92rem; font-weight:700; }
+    .phase-tab-focus { font-size:0.74rem; color:var(--txt3); margin-top:2px; }
+
+    .phase-overview { background:var(--card); border:1px solid var(--border); border-radius:var(--r-xl); padding:24px 26px; margin-bottom:24px; animation:fadeUp 0.4s var(--ease-out) both; }
+    .phase-overview-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:14px; flex-wrap:wrap; gap:12px; }
+    .phase-overview h2 { font-size:1.25rem; margin-bottom:6px; }
+    .phase-overview p  { color:var(--txt2); font-size:0.875rem; line-height:1.55; }
+    .phase-progress-info { display:flex; align-items:center; gap:16px; }
+    .phase-progress-info .num { font-size:1.5rem; font-weight:800; letter-spacing:-0.04em; color:var(--gold); }
+    .phase-progress-info .lbl { font-size:0.7rem; color:var(--txt3); text-transform:uppercase; letter-spacing:0.08em; }
+
+    /* Workout cards */
+    .workouts-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:16px; }
+    .workout-card {
+      background:var(--card); border:1px solid var(--border);
+      border-radius:var(--r-xl); padding:22px 24px;
+      cursor:pointer; transition:all 0.25s var(--ease);
+      text-decoration:none; color:inherit;
+      animation:fadeUp 0.4s var(--ease-out) both;
+      position:relative; overflow:hidden;
+      display:flex; flex-direction:column;
+    }
+    .workout-card:hover { border-color:var(--gold); transform:translateY(-4px); box-shadow:0 12px 40px rgba(0,0,0,0.4), 0 0 0 1px var(--gold); }
+    .workout-card.completed-this-week { border-color:rgba(34,197,94,0.4); background:rgba(34,197,94,0.05); }
+    .workout-card-letter {
+      width:46px; height:46px;
+      border-radius:var(--r-md);
+      background:var(--gold);
+      color:#000;
+      display:flex; align-items:center; justify-content:center;
+      font-size:1.3rem; font-weight:900;
+      margin-bottom:14px;
+      letter-spacing:-0.03em;
+    }
+    .workout-card.type-running .workout-card-letter { background:#60a5fa; }
+    .workout-card.type-upper .workout-card-letter { background:#ef4444; }
+    .workout-card.type-lower .workout-card-letter { background:#f59e0b; }
+    .workout-card.type-fbw .workout-card-letter { background:#a855f7; }
+    .workout-card.type-strength .workout-card-letter { background:#C8A45A; }
+    .workout-card-title { font-size:1.05rem; font-weight:700; letter-spacing:-0.02em; margin-bottom:4px; }
+    .workout-card-subtitle { font-size:0.78rem; color:var(--txt3); margin-bottom:14px; }
+    .workout-card-desc { font-size:0.82rem; color:var(--txt2); line-height:1.5; margin-bottom:18px; flex:1; }
+    .workout-card-stats { display:flex; gap:14px; padding-top:14px; border-top:1px solid var(--border); margin-top:auto; font-size:0.78rem; }
+    .workout-card-stats > div { flex:1; }
+    .workout-card-stats .num { font-weight:700; color:var(--txt); }
+    .workout-card-stats .lbl { color:var(--txt3); font-size:0.7rem; }
+    .workout-card-cta { margin-top:14px; padding:11px 14px; background:var(--card2); border:1px solid var(--border2); border-radius:var(--r-md); font-size:0.82rem; font-weight:600; display:flex; align-items:center; justify-content:center; gap:6px; transition:all 0.2s; }
+    .workout-card:hover .workout-card-cta { background:var(--gold); color:#000; border-color:var(--gold); }
+    .workout-completed-tick { position:absolute; top:14px; right:14px; width:28px; height:28px; border-radius:50%; background:var(--green); color:#000; display:flex; align-items:center; justify-content:center; }
+
+    .coming-soon-overlay {
+      background: var(--card);
+      border: 1px solid rgba(245,158,11,0.3);
+      border-radius: var(--r-xl);
+      padding: 40px 30px;
+      text-align: center;
+    }
+    .coming-soon-overlay-icon { width:60px; height:60px; margin:0 auto 16px; background:rgba(245,158,11,0.1); border:1px solid rgba(245,158,11,0.3); border-radius:50%; display:flex; align-items:center; justify-content:center; color:#f59e0b; }
+    .coming-soon-overlay h3 { font-size:1.2rem; margin-bottom:8px; }
+    .coming-soon-overlay p { color:var(--txt2); font-size:0.875rem; max-width:380px; margin:0 auto; }
+
+    @media (max-width:640px) {
+      .plan-hero { padding:22px 20px; }
+      .plan-hero-icon { width:60px; height:60px; right:18px; }
+      .plan-hero-content { max-width:100%; padding-right:60px; }
+      .plan-hero-title { font-size:1.4rem; }
+    }
+  </style>
+</head>
+<body class="app-body">
+
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <a class="sidebar-logo" href="dashboard.html">
+      <div class="sidebar-logo-icon">CB</div>
+      <div><div class="sidebar-logo-name">Crystal Ballers</div><div class="sidebar-logo-sub">Athletic Performance</div></div>
+    </a>
+  </div>
+  <div class="sidebar-nav">
+    <a class="nav-link" href="dashboard.html"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Dashboard</a>
+    <a class="nav-link" href="plan.html"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Plany</a>
+    <a class="nav-link" href="journal.html"><svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>Dziennik</a>
+    <a class="nav-link" href="chat.html"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Wiadomości<span class="nav-badge hidden" id="msgBadge">0</span></a>
+    <a class="nav-link" href="performance.html"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Wyniki</a>
+  </div>
+  <div class="sidebar-footer"><div class="sidebar-user" id="sidebarUser"></div></div>
+</nav>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<main class="main-content">
+  <header class="page-header">
+    <button class="hamburger" id="hamburger">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+    <h1>Plany treningowe</h1>
+  </header>
+
+  <div class="content" id="mainContent"></div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../js/config.js"></script>
+<script src="../js/data.js"></script>
+<script src="../js/auth.js"></script>
+<script src="../js/icons.js"></script>
+<script src="../js/plans-data.js"></script>
+<script src="../js/app.js"></script>
+<script>
+(async () => {
+if (!(await Auth.requirePlayer())) return;
+const user = Auth.getUser();
+if (!CB.hasActiveSubscription(user)) { window.location.href = '../pricing.html'; return; }
+renderSidebarUser(user);
+updateMsgBadge(user.id);
+
+const allPlans = CB.getPlans();
+// Wybór planu — z URL ?p= albo z localStorage albo pierwszy
+const urlPlan = new URLSearchParams(location.search).get('p');
+let activePlanId = urlPlan || localStorage.getItem('cb_last_plan') || user.planId || 'plan1';
+if (!allPlans.find(p => p.id === activePlanId)) activePlanId = 'plan1';
+
+let activePhase = 1;
+const content = document.getElementById('mainContent');
+
+function renderAll() {
+  const selector = `
+    <div class="plan-selector">
+      ${allPlans.map((p, i) => `
+        <div class="plan-tile ${p.id === activePlanId ? 'active' : ''} ${PlanContent.get(p.id)?.comingSoon ? 'coming-soon' : ''}"
+             style="--plan-color:${p.color}; animation-delay:${i*0.06}s"
+             onclick="switchPlan('${p.id}')">
+          ${PlanContent.get(p.id)?.comingSoon ? '<div class="plan-tile-badge">Wkrótce</div>' : ''}
+          <div class="plan-tile-icon">${ICONS[p.iconKey] || ''}</div>
+          <div>
+            <div class="plan-tile-name">${p.name}</div>
+            <div class="plan-tile-meta">12 tygodni · 3 fazy</div>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+
+  const plan = CB.getPlanById(activePlanId);
+  const planContent = PlanContent.get(activePlanId);
+  if (!planContent) { content.innerHTML = selector + '<p class="text-muted">Plan w przygotowaniu.</p>'; return; }
+
+  const isComingSoon = planContent.comingSoon;
+  const currentWeek = 1; // Bez śledzenia per-plan: zaczynamy od tygodnia 1, faza 1
+  const currentPhase = 1;
+  if (activePhase < 1 || activePhase > planContent.phases.length) activePhase = 1;
+
+  const hero = `
+    <div class="plan-hero" style="--plan-color:${planContent.color}">
+      <div class="plan-hero-icon">${ICONS[planContent.iconKey] || ''}</div>
+      <div class="plan-hero-content">
+        <div class="plan-hero-eyebrow">${planContent.structure || 'Plan treningowy'}</div>
+        <div class="plan-hero-title">${planContent.name}</div>
+        <div class="plan-hero-desc">${planContent.intro}</div>
+        <div class="plan-hero-meta">
+          <div class="plan-hero-meta-item">
+            <span class="label">Status</span>
+            <span class="value">${isComingSoon
+              ? '<span class="badge badge-gold"><span class="badge-dot" style="background:#f59e0b"></span>Wkrótce</span>'
+              : '<span class="badge badge-green"><span class="badge-dot" style="background:var(--green)"></span>Dostępny</span>'}</span>
+          </div>
+          <div class="plan-hero-meta-item">
+            <span class="label">Czas trwania</span>
+            <span class="value">${planContent.totalWeeks} tygodni</span>
+          </div>
+          <div class="plan-hero-meta-item">
+            <span class="label">Faz</span>
+            <span class="value">${planContent.phases.length}</span>
+          </div>
+          <div class="plan-hero-meta-item">
+            <span class="label">Treningów</span>
+            <span class="value">${planContent.phases.reduce((s,ph)=>s+ph.workouts.length,0)}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  if (isComingSoon) {
+    content.innerHTML = selector + hero + `
+      <div class="coming-soon-overlay">
+        <div class="coming-soon-overlay-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" width="28" height="28"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        <h3>Plan w przygotowaniu</h3>
+        <p>Pełna treść tego planu zostanie dodana wkrótce. Tymczasem masz pełny dostęp do pozostałych planów — wystarczy że klikniesz inny powyżej.</p>
+      </div>
+    `;
+    return;
+  }
+
+  const tabs = `
+    <div class="phase-tabs" id="phaseTabs">
+      ${planContent.phases.map(ph => `
+        <button class="phase-tab ${ph.num===activePhase?'active':''}" data-phase="${ph.num}">
+          <div class="phase-tab-num">Faza ${ph.num} · ${ph.weeks} tyg.</div>
+          <div class="phase-tab-name">${ph.focus}</div>
+          <div class="phase-tab-focus">${ph.num < currentPhase ? '✓ Zakończona' : ph.num === currentPhase ? '● Aktualna' : '○ Wkrótce'}</div>
+        </button>
+      `).join('')}
+    </div>
+    <div id="phaseContent"></div>
+  `;
+
+  content.innerHTML = selector + hero + tabs;
+  document.querySelectorAll('.phase-tab').forEach(t => {
+    t.addEventListener('click', () => { activePhase = +t.dataset.phase; renderAll(); });
+  });
+  renderPhaseContent();
+}
+
+function renderPhaseContent() {
+  const planContent = PlanContent.get(activePlanId);
+  const phase = planContent.phases.find(p => p.num === activePhase);
+  if (!phase) return;
+
+  const totalInPhase = PlanContent.totalWorkoutsInPhase(activePlanId, phase.num);
+  const completedInPhase = CB.countSessionsInPhase(user.id, activePlanId, phase.num);
+  const pct = totalInPhase ? Math.round((completedInPhase / totalInPhase) * 100) : 0;
+
+  const cards = phase.workouts.map((w, i) => {
+    const doneThisWeek = CB.hasCompletedSession(user.id, activePlanId, phase.num, w.letter, 1);
+    const exerciseCount = w.sections.reduce((s, sec) => s + sec.exercises.length, 0);
+    return `
+      <a class="workout-card type-${w.type} ${doneThisWeek?'completed-this-week':''}"
+         href="workout.html?p=${activePlanId}&ph=${phase.num}&w=${w.letter}&wk=1"
+         style="animation-delay:${i*0.06}s">
+        ${doneThisWeek ? `<div class="workout-completed-tick">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" width="14" height="14"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>` : ''}
+        <div class="workout-card-letter">${w.letter}</div>
+        <div class="workout-card-title">${w.title}</div>
+        <div class="workout-card-subtitle">${w.frequency || 'Trening ' + w.letter} · ${w.duration}</div>
+        <div class="workout-card-desc">${w.description}</div>
+        <div class="workout-card-stats">
+          <div><div class="num">${exerciseCount}</div><div class="lbl">Ćwiczeń</div></div>
+          <div><div class="num">${w.sections.length}</div><div class="lbl">Sekcji</div></div>
+          <div><div class="num">${typeLabel(w.type)}</div><div class="lbl">Typ</div></div>
+        </div>
+        <div class="workout-card-cta">
+          ${doneThisWeek ? '✓ Ukończono' : 'Rozpocznij trening'}
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </div>
+      </a>
+    `;
+  }).join('');
+
+  document.getElementById('phaseContent').innerHTML = `
+    <div class="phase-overview">
+      <div class="phase-overview-header">
+        <div>
+          <h2>${phase.name} — ${phase.focus}</h2>
+          <p>${phase.description}</p>
+        </div>
+        <div class="phase-progress-info">
+          <div style="text-align:center">
+            <div class="num">${pct}%</div>
+            <div class="lbl">Postęp fazy</div>
+          </div>
+          <div style="text-align:center">
+            <div class="num" style="color:var(--green)">${completedInPhase}</div>
+            <div class="lbl">Ukończone</div>
+          </div>
+        </div>
+      </div>
+      <div class="progress-bar mt-12" style="height:8px">
+        <div class="progress-bar-fill green" style="width:${pct}%"></div>
+      </div>
+    </div>
+    <div class="workouts-grid">${cards}</div>
+  `;
+}
+
+function typeLabel(type) {
+  return {lower:'Dół', upper:'Góra', running:'Bieg', fbw:'FBW', strength:'Siła'}[type] || '—';
+}
+
+window.switchPlan = function(planId) {
+  activePlanId = planId;
+  activePhase = 1;
+  localStorage.setItem('cb_last_plan', planId);
+  CB.updateUser(user.id, { planId }).catch(()=>{});
+  renderAll();
+};
+
+renderAll();
+})().catch(e => { console.error(e); alert('Błąd: '+e.message); });
+</script>
+</body>
+</html>
