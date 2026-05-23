@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#07070a">
+  <link rel="manifest" href="../manifest.json">
+  <link rel="icon" type="image/svg+xml" href="../icon.svg">
+  <link rel="apple-touch-icon" href="../icon-192.svg">
+  <title>Plany Treningowe — Crystal Ballers</title>
+  <link rel="stylesheet" href="../css/main.css">
+  <style>
+    .plans-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:18px; margin-bottom:36px; }
+    .admin-plan-card { background:var(--card); border:1px solid var(--border); border-radius:var(--r-xl); overflow:hidden; transition:all 0.2s; animation:fadeUp 0.4s var(--ease-out) both; display:flex; flex-direction:column; }
+    .admin-plan-card:hover { border-color:var(--border2); transform:translateY(-3px); box-shadow:var(--shadow); }
+    .admin-plan-cover { height:140px; display:flex; align-items:center; justify-content:center; position:relative; border-bottom:1px solid var(--border); color:var(--plan-color, var(--gold)); }
+    .admin-plan-cover svg { width:64px; height:64px; }
+    .admin-plan-body { padding:22px; display:flex; flex-direction:column; flex:1; }
+    .admin-plan-name { font-size:1.1rem; font-weight:700; margin-bottom:6px; letter-spacing:-0.02em; }
+    .admin-plan-desc { font-size:0.82rem; color:var(--txt2); margin-bottom:14px; line-height:1.55; }
+    .admin-plan-stats { display:flex; gap:14px; padding:14px 0; border-top:1px solid var(--border); border-bottom:1px solid var(--border); margin-bottom:14px; }
+    .admin-plan-stat { flex:1; }
+    .admin-plan-stat .num { font-size:1.1rem; font-weight:800; }
+    .admin-plan-stat .lbl { font-size:0.66rem; color:var(--txt3); text-transform:uppercase; letter-spacing:0.05em; }
+    .plan-type-badge { display:inline-flex; align-items:center; gap:6px; padding:5px 10px; border-radius:var(--r-full); font-size:0.7rem; font-weight:700; margin-bottom:10px; }
+    .plan-type-badge.builtin { background:var(--green2); color:var(--green); border:1px solid rgba(34,197,94,0.25); }
+    .plan-type-badge.soon { background:rgba(245,158,11,0.15); color:#f59e0b; border:1px solid rgba(245,158,11,0.3); }
+    .phase-mini { padding:14px 16px; background:var(--card); border:1px solid var(--border); border-radius:var(--r-md); margin-bottom:10px; }
+    .phase-mini-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+    .phase-mini-title { font-size:0.92rem; font-weight:700; }
+    .workout-mini-list { display:flex; gap:6px; flex-wrap:wrap; }
+    .workout-mini-pill { padding:5px 10px; background:var(--bg3); border:1px solid var(--border2); border-radius:var(--r-sm); font-size:0.74rem; font-weight:600; }
+  </style>
+</head>
+<body class="app-body">
+
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <a class="sidebar-logo" href="dashboard.html">
+      <div class="sidebar-logo-icon">CB</div>
+      <div><div class="sidebar-logo-name">Crystal Ballers</div><div class="sidebar-logo-sub">Panel Trenera</div></div>
+    </a>
+  </div>
+  <div class="sidebar-nav">
+    <div class="sidebar-section-label" style="padding-top:8px">Zarządzanie</div>
+    <a class="nav-link" href="dashboard.html"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Dashboard</a>
+    <a class="nav-link" href="players.html"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Zawodnicy</a>
+    <a class="nav-link" href="plans.html"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Plany treningowe</a>
+    <a class="nav-link" href="messages.html"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Wiadomości<span class="nav-badge hidden" id="msgBadge">0</span></a>
+  </div>
+  <div class="sidebar-footer"><div class="sidebar-user" id="sidebarUser"></div></div>
+</nav>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<main class="main-content">
+  <header class="page-header">
+    <button class="hamburger" id="hamburger"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+    <h1>Plany treningowe</h1>
+  </header>
+
+  <div class="content">
+    <div class="section-header">
+      <div>
+        <h2 class="section-title">3 wbudowane plany Crystal Ballers</h2>
+        <p class="text-sm text-muted mt-4">Wszyscy subskrybenci mają dostęp do wszystkich 3 planów. Treść wbudowana natywnie — bez PDF.</p>
+      </div>
+    </div>
+    <div class="plans-grid" id="plansGrid"></div>
+  </div>
+</main>
+
+<!-- Built-in Plan Detail Modal -->
+<div class="modal-overlay" id="builtinModal">
+  <div class="modal" style="max-width:720px">
+    <div class="modal-header">
+      <h2 class="modal-title" id="builtinTitle">Plan</h2>
+      <button class="modal-close" data-close-modal><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div id="builtinContent"></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../js/config.js"></script>
+<script src="../js/data.js"></script>
+<script src="../js/auth.js"></script>
+<script src="../js/icons.js"></script>
+<script src="../js/plans-data.js"></script>
+<script src="../js/app.js"></script>
+<script>
+(async () => {
+if (!(await Auth.requireAdmin())) return;
+const admin = Auth.getUser();
+renderSidebarUser(admin);
+updateMsgBadge(admin.id);
+
+function renderPlans() {
+  const plans = CB.getPlans();
+  document.getElementById('plansGrid').innerHTML = plans.map((plan,i) => {
+    const playerCount = CB.getPlayers().filter(p => CB.hasActiveSubscription(p)).length;
+    const content = PlanContent.get(plan.id);
+    const workoutCount = content ? content.phases.reduce((s,ph)=>s+ph.workouts.length,0) : 0;
+    const isComingSoon = content?.comingSoon;
+
+    return `
+    <div class="admin-plan-card" style="--plan-color:${plan.color}; animation-delay:${i*0.06}s">
+      <div class="admin-plan-cover" style="background:linear-gradient(135deg, ${plan.color}1f 0%, ${plan.color}05 100%)">
+        ${ICONS[plan.iconKey] || ''}
+      </div>
+      <div class="admin-plan-body">
+        <div>
+          ${isComingSoon
+            ? '<span class="plan-type-badge soon">Wkrótce — treść w przygotowaniu</span>'
+            : '<span class="plan-type-badge builtin">Aktywny · Wbudowany</span>'}
+        </div>
+        <div class="admin-plan-name">${plan.name}</div>
+        <div class="admin-plan-desc">${plan.description}</div>
+
+        <div class="admin-plan-stats">
+          <div class="admin-plan-stat">
+            <div class="num" style="color:${plan.color}">${playerCount}</div>
+            <div class="lbl">Zawodników</div>
+          </div>
+          <div class="admin-plan-stat">
+            <div class="num">${content?.totalWeeks || 12} tyg.</div>
+            <div class="lbl">Czas</div>
+          </div>
+          <div class="admin-plan-stat">
+            <div class="num">${workoutCount}</div>
+            <div class="lbl">Treningi</div>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:auto">
+          <button class="btn btn-primary btn-sm" onclick="viewBuiltIn('${plan.id}')">Podgląd zawartości</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function viewBuiltIn(planId) {
+  const plan = CB.getPlanById(planId);
+  const content = PlanContent.get(planId);
+  document.getElementById('builtinTitle').textContent = plan.name;
+
+  const phasesHtml = content.phases.map(phase => `
+    <div class="phase-mini">
+      <div class="phase-mini-header">
+        <div>
+          <div class="phase-mini-title">${phase.name} — ${phase.focus}</div>
+          <div class="text-xs text-dim mt-4">${phase.weeks} tygodni · ${phase.workouts.length} treningi</div>
+        </div>
+      </div>
+      <div class="text-sm text-muted mb-12" style="line-height:1.5">${phase.description}</div>
+      <div class="workout-mini-list">
+        ${phase.workouts.map(w => {
+          const exCount = w.sections.reduce((s,sec)=>s+sec.exercises.length,0);
+          return `<span class="workout-mini-pill">
+            <strong>${w.letter}</strong> — ${w.title} <span style="color:var(--txt3)">(${exCount} ćw.)</span>
+          </span>`;
+        }).join('')}
+      </div>
+    </div>
+  `).join('');
+
+  document.getElementById('builtinContent').innerHTML = `
+    <p style="margin-bottom:16px;color:var(--txt2);line-height:1.6">${content.intro}</p>
+    <div class="badge badge-green mb-16" style="font-size:0.78rem">
+      <span class="badge-dot" style="background:var(--green)"></span>
+      Plan wbudowany natywnie — subskrybenci mają dostęp w aplikacji
+    </div>
+    <div class="grid-3 mb-16" style="gap:10px">
+      <div class="card" style="padding:12px;text-align:center"><div style="font-size:1.4rem;font-weight:800;color:${plan.color}">${content.phases.length}</div><div class="text-xs text-dim">Faz</div></div>
+      <div class="card" style="padding:12px;text-align:center"><div style="font-size:1.4rem;font-weight:800;color:${plan.color}">${content.totalWeeks}</div><div class="text-xs text-dim">Tygodni</div></div>
+      <div class="card" style="padding:12px;text-align:center"><div style="font-size:1.4rem;font-weight:800;color:${plan.color}">${content.phases.reduce((s,p)=>s+p.workouts.length,0)}</div><div class="text-xs text-dim">Treningów</div></div>
+    </div>
+    ${phasesHtml}
+    <div class="modal-footer">
+      <button class="btn btn-ghost" data-close-modal onclick="closeModal('builtinModal')">Zamknij</button>
+    </div>
+  `;
+  openModal('builtinModal');
+}
+window.viewBuiltIn = viewBuiltIn;
+
+renderPlans();
+})().catch(e => { console.error(e); alert('Błąd: '+e.message); });
+</script>
+</body>
+</html>
